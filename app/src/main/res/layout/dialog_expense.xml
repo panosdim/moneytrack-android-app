@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:paddingHorizontal="8dp"
+    android:paddingVertical="8dp">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/date"
+        app:endIconMode="custom"
+        app:endIconDrawable="@drawable/ic_calendar"
+        android:paddingBottom="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/expenseDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="date"
+            android:focusableInTouchMode="false"
+            android:selectAllOnFocus="true" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/amount"
+        app:endIconMode="custom"
+        app:endIconDrawable="@drawable/ic_euro_symbol"
+        android:paddingBottom="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/expenseAmount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="numberDecimal"
+            android:imeOptions="actionNext"
+            android:selectAllOnFocus="true" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/category"
+        android:paddingBottom="8dp"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+
+        <AutoCompleteTextView
+            android:id="@+id/expenseCategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="none"
+            tools:ignore="LabelFor" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/comment"
+        android:paddingBottom="8dp">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/expenseComment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapWords"
+            android:selectAllOnFocus="true" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <ProgressBar
+        android:id="@+id/prgIndicator"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/deleteExpense"
+            style="@style/Widget.Material3.Button.OutlinedButton.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/ic_delete"
+            android:text="@string/delete" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/saveExpense"
+            style="@style/Widget.Material3.Button.Icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:icon="@drawable/ic_save"
+            android:text="@string/save" />
+    </LinearLayout>
+
+</LinearLayout>

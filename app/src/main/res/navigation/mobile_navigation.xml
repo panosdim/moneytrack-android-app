@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@+id/navigation_expenses">
+
+    <fragment
+        android:id="@+id/navigation_expenses"
+        android:name="com.panosdim.moneytrack.fragments.ExpensesFragment"
+        android:label="@string/title_expenses"
+        tools:layout="@layout/fragment_expenses" />
+
+    <fragment
+        android:id="@+id/navigation_dashboard"
+        android:name="com.panosdim.moneytrack.fragments.DashboardFragment"
+        android:label="@string/title_dashboard"
+        tools:layout="@layout/fragment_dashboard" />
+
+    <fragment
+        android:id="@+id/navigation_income"
+        android:name="com.panosdim.moneytrack.fragments.IncomeFragment"
+        android:label="@string/title_income"
+        tools:layout="@layout/fragment_income" />
+
+    <fragment
+        android:id="@+id/navigation_categories"
+        android:name="com.panosdim.moneytrack.fragments.CategoriesFragment"
+        android:label="@string/title_categories"
+        tools:layout="@layout/fragment_income" />
+</navigation>

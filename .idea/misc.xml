@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CMakeSettings">
+    <configurations>
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+    </configurations>
+  </component>
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/drawable/back.xml" value="0.214" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/drawable/close.xml" value="0.214" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/drawable/ic_add.xml" value="0.214" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/drawable/ic_calendar.xml" value="0.1635" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/drawable/ic_wallet.xml" value="0.214" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/activity_login.xml" value="0.12360688956433637" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/activity_main.xml" value="0.25416666666666665" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/dialog_category.xml" value="0.24010416666666667" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/dialog_expense.xml" value="0.24010416666666667" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/dialog_expenses_filter.xml" value="0.24010416666666667" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/dialog_expenses_sort.xml" value="0.22604166666666667" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/dialog_income.xml" value="0.11676798378926039" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/dialog_income_filter.xml" value="0.407514450867052" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/fragment_categories.xml" value="0.24010416666666667" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/fragment_dashboard.xml" value="0.25416666666666665" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/fragment_expenses.xml" value="0.264" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/fragment_income.xml" value="0.25416666666666665" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/list_item.xml" value="0.24010416666666667" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/row_category.xml" value="0.24010416666666667" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/row_chip_view.xml" value="0.24010416666666667" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/row_expense.xml" value="0.4" />
+        <entry key="..\:/GitHub Repos/Money Track/moneytrack-android-app/app/src/main/res/layout/row_income.xml" value="0.4" />
+        <entry key="..\:/GitHub/moneytrack-android-app/app/src/main/res/layout/activity_login.xml" value="0.3625" />
+        <entry key="..\:/GitHub/moneytrack-android-app/app/src/main/res/layout/activity_main.xml" value="0.3625" />
+        <entry key="..\:/GitHub/moneytrack-android-app/app/src/main/res/layout/fragment_expenses.xml" value="0.3625" />
+        <entry key="..\:/GitHub/moneytrack-android-app/app/src/main/res/layout/fragment_income.xml" value="0.3625" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="11" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

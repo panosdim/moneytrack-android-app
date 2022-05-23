@@ -1,0 +1,17 @@
+<resources>
+    <attr name="colorExpense" format="color" />
+    <attr name="colorOnExpense" format="color" />
+    <attr name="colorExpenseContainer" format="color" />
+    <attr name="colorOnExpenseContainer" format="color" />
+    <attr name="harmonizeExpense" format="boolean" />
+    <attr name="colorIncome" format="color" />
+    <attr name="colorOnIncome" format="color" />
+    <attr name="colorIncomeContainer" format="color" />
+    <attr name="colorOnIncomeContainer" format="color" />
+    <attr name="harmonizeIncome" format="boolean" />
+    <attr name="colorCategory" format="color" />
+    <attr name="colorOnCategory" format="color" />
+    <attr name="colorCategoryContainer" format="color" />
+    <attr name="colorOnCategoryContainer" format="color" />
+    <attr name="harmonizeCategory" format="boolean" />
+</resources>
