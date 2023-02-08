@@ -4,11 +4,11 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.panosdim.moneytrack.App
 import com.panosdim.moneytrack.R
-import com.panosdim.moneytrack.YEARS_TO_FETCH
 import com.panosdim.moneytrack.api.data.Resource
 import com.panosdim.moneytrack.db
 import com.panosdim.moneytrack.db.dao.IncomeDao
 import com.panosdim.moneytrack.model.Income
+import com.panosdim.moneytrack.utils.currentMonth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -22,12 +22,19 @@ class IncomeRepository {
     private val scope = CoroutineScope(Dispatchers.Main)
     private val incomeDao: IncomeDao = db.incomeDao()
 
-    fun get(): LiveData<List<Income>> {
+    fun get(fetchAll: Boolean = false): LiveData<List<Income>> {
         scope.launch {
             try {
-                withContext(Dispatchers.IO) {
-                    val response = client.income(YEARS_TO_FETCH)
-                    incomeDao.deleteAndCreate(response)
+                if (fetchAll) {
+                    withContext(Dispatchers.IO) {
+                        val response = client.income(null)
+                        incomeDao.deleteAndCreateAll(response)
+                    }
+                } else {
+                    withContext(Dispatchers.IO) {
+                        val response = client.income(currentMonth())
+                        incomeDao.deleteAndCreateMonth(response)
+                    }
                 }
             } catch (ex: Exception) {
                 withContext(Dispatchers.IO) {

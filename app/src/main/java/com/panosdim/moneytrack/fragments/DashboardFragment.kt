@@ -12,6 +12,9 @@ import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
@@ -29,6 +32,7 @@ import com.panosdim.moneytrack.utils.moneyFormat
 import com.panosdim.moneytrack.utils.resolveColorAttr
 import com.panosdim.moneytrack.viewmodel.ExpensesViewModel
 import com.panosdim.moneytrack.viewmodel.IncomeViewModel
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Month
 
@@ -48,6 +52,7 @@ class DashboardFragment : Fragment(), OnChartValueSelectedListener {
     private var incomeList: List<Income> = mutableListOf()
     private var expensesList: List<Expense> = mutableListOf()
     private var categoriesList: List<Category> = mutableListOf()
+    private lateinit var years: MutableList<Int>
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -75,6 +80,37 @@ class DashboardFragment : Fragment(), OnChartValueSelectedListener {
             initializeChart()
         }
 
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                expensesViewModel.years().collect {
+                    years = it.toMutableList()
+                    val currentYear = today.year
+                    if (!years.contains(currentYear)) {
+                        years.add(0, currentYear)
+                    }
+                    val yearAdapter = ArrayAdapter(
+                        requireContext(),
+                        R.layout.list_item,
+                        years.toTypedArray()
+                    )
+                    binding.overviewYear.setAdapter(yearAdapter)
+                    // Workaround as there is a bug in AutoCompleteView filter setting
+                    binding.overviewYear.setText(selectedYear.toString(), false)
+
+                    binding.overviewYear.setOnItemClickListener { parent, _, position, _ ->
+                        selectedYear = parent.getItemAtPosition(position) as Int
+                        val s = LocalDate.of(selectedYear, selectedMonth, 1)
+                        startOfYear = s.withDayOfMonth(1).withMonth(1)
+                        endOfYear = s.withMonth(12).withDayOfMonth(31)
+                        startOfMonth = s.withDayOfMonth(1)
+                        endOfMonth = s.withDayOfMonth(s.lengthOfMonth())
+                        initializeSavings()
+                        initializeChart()
+                    }
+                }
+            }
+        }
+
         return root
     }
 
@@ -99,28 +135,6 @@ class DashboardFragment : Fragment(), OnChartValueSelectedListener {
             endOfMonth = s.withDayOfMonth(s.lengthOfMonth())
             startOfYear = s.withDayOfMonth(1).withMonth(1)
             endOfYear = s.withMonth(12).withDayOfMonth(31)
-            initializeSavings()
-            initializeChart()
-        }
-
-        val currentYear = today.year
-        val years = IntArray(4) { currentYear - it }
-        val yearAdapter = ArrayAdapter(
-            requireContext(),
-            R.layout.list_item,
-            years.toTypedArray()
-        )
-        binding.overviewYear.setAdapter(yearAdapter)
-        // Workaround as there is a bug in AutoCompleteView filter setting
-        binding.overviewYear.setText(selectedYear.toString(), false)
-
-        binding.overviewYear.setOnItemClickListener { parent, _, position, _ ->
-            selectedYear = parent.getItemAtPosition(position) as Int
-            val s = LocalDate.of(selectedYear, selectedMonth, 1)
-            startOfYear = s.withDayOfMonth(1).withMonth(1)
-            endOfYear = s.withMonth(12).withDayOfMonth(31)
-            startOfMonth = s.withDayOfMonth(1)
-            endOfMonth = s.withDayOfMonth(s.lengthOfMonth())
             initializeSavings()
             initializeChart()
         }

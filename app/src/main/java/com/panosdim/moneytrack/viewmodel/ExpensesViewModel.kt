@@ -8,6 +8,11 @@ import com.panosdim.moneytrack.model.Category
 import com.panosdim.moneytrack.model.Expense
 import com.panosdim.moneytrack.utils.getCategoryName
 import com.panosdim.moneytrack.utils.unaccent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.shareIn
 import java.time.LocalDate
 
 class ExpensesViewModel : ViewModel() {
@@ -146,9 +151,9 @@ class ExpensesViewModel : ViewModel() {
         return data
     }
 
-    fun refreshExpenses() {
+    fun refreshExpenses(fetchAll: Boolean = false) {
         expenses.removeSource(_expenses)
-        _expenses = Transformations.switchMap(expensesRepository.get()) { data ->
+        _expenses = Transformations.switchMap(expensesRepository.get(fetchAll)) { data ->
             MutableLiveData<List<Expense>>().apply {
                 this.value = data
             }
@@ -158,6 +163,14 @@ class ExpensesViewModel : ViewModel() {
             data = sort(data)
             expenses.value = data
         }
+    }
+
+    suspend fun years(): SharedFlow<List<Int>> {
+        return expensesRepository.years().shareIn(
+            CoroutineScope(Dispatchers.IO),
+            SharingStarted.WhileSubscribed(),
+            1
+        )
     }
 
     private fun isFilterSet(): Boolean {

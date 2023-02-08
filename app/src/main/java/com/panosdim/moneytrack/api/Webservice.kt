@@ -12,8 +12,11 @@ interface Webservice {
     @POST("login")
     suspend fun login(@Body request: LoginRequest): LoginResponse
 
+    @GET("years")
+    suspend fun years(): List<Int>
+
     @GET("income")
-    suspend fun income(@Query("years") years: String): List<Income>
+    suspend fun income(@Query("after_date") afterDate: String?): List<Income>
 
     @POST("income")
     suspend fun income(@Body request: Income): Income
@@ -25,7 +28,7 @@ interface Webservice {
     suspend fun income(@Path("id") id: Int): Response<Void>
 
     @GET("expense")
-    suspend fun expense(@Query("years") years: String): List<Expense>
+    suspend fun expense(@Query("after_date") afterDate: String?): List<Expense>
 
     @POST("expense")
     suspend fun expense(@Body request: Expense): Expense

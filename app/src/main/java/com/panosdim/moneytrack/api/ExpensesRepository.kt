@@ -4,13 +4,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.panosdim.moneytrack.App
 import com.panosdim.moneytrack.R
-import com.panosdim.moneytrack.YEARS_TO_FETCH
 import com.panosdim.moneytrack.api.data.Resource
 import com.panosdim.moneytrack.db
 import com.panosdim.moneytrack.db.dao.ExpenseDao
 import com.panosdim.moneytrack.model.Expense
+import com.panosdim.moneytrack.utils.currentMonth
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
@@ -22,12 +25,26 @@ class ExpensesRepository {
     private val scope = CoroutineScope(Dispatchers.Main)
     private val expenseDao: ExpenseDao = db.expenseDao()
 
-    fun get(): LiveData<List<Expense>> {
+    suspend fun years(): Flow<List<Int>> {
+        return flow {
+            emit(webservice.years())
+        }
+            .flowOn(Dispatchers.IO)
+    }
+
+    fun get(fetchAll: Boolean = false): LiveData<List<Expense>> {
         scope.launch {
             try {
-                withContext(Dispatchers.IO) {
-                    val response = client.expense(YEARS_TO_FETCH)
-                    expenseDao.deleteAndCreate(response)
+                if (fetchAll) {
+                    withContext(Dispatchers.IO) {
+                        val response = client.expense(null)
+                        expenseDao.deleteAndCreateAll(response)
+                    }
+                } else {
+                    withContext(Dispatchers.IO) {
+                        val response = client.expense(currentMonth())
+                        expenseDao.deleteAndCreateMonth(response)
+                    }
                 }
             } catch (ex: Exception) {
                 withContext(Dispatchers.IO) {

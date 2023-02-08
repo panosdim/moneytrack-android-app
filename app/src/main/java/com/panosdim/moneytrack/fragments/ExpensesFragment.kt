@@ -59,7 +59,7 @@ class ExpensesFragment : Fragment() {
         }
 
         binding.expSwipeRefresh.setOnRefreshListener {
-            viewModel.refreshExpenses()
+            viewModel.refreshExpenses(true)
             binding.expSwipeRefresh.isRefreshing = false
         }
     }
@@ -137,6 +137,11 @@ class ExpensesFragment : Fragment() {
         }
 
         return root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshExpenses()
     }
 
     override fun onDestroyView() {

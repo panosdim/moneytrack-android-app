@@ -26,3 +26,8 @@ fun String.toLocalDate(formatter: DateTimeFormatter): LocalDate {
         LocalDate.now()
     }
 }
+
+fun currentMonth(): String {
+    val dbDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    return LocalDate.now().withDayOfMonth(1).format(dbDateFormatter)
+}

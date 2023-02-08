@@ -52,7 +52,7 @@ class IncomeFragment : Fragment() {
         }
 
         binding.incSwipeRefresh.setOnRefreshListener {
-            viewModel.refreshIncome()
+            viewModel.refreshIncome(true)
             binding.incSwipeRefresh.isRefreshing = false
         }
     }
@@ -130,6 +130,11 @@ class IncomeFragment : Fragment() {
         }
 
         return root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.refreshIncome()
     }
 
     override fun onDestroyView() {

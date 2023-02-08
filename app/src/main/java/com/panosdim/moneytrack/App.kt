@@ -20,9 +20,8 @@ val auth by lazy {
     App.auth
 }
 
-const val BACKEND_URL = "https://moneytrack.dsw.mywire.org/api/"
+const val BACKEND_URL = BuildConfig.BASE_URL
 const val TAG = "MONEY_TRACK"
-const val YEARS_TO_FETCH = "3"
 
 class App : Application() {
     companion object {

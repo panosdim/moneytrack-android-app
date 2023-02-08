@@ -116,9 +116,9 @@ class IncomeViewModel : ViewModel() {
         return data
     }
 
-    fun refreshIncome() {
+    fun refreshIncome(fetchAll: Boolean = false) {
         income.removeSource(_income)
-        _income = Transformations.switchMap(incomeRepository.get()) { data ->
+        _income = Transformations.switchMap(incomeRepository.get(fetchAll)) { data ->
             MutableLiveData<List<Income>>().apply {
                 this.value = data
             }
