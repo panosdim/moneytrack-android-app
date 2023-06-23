@@ -42,6 +42,7 @@ fun moneyFormat(obj: Any): String {
     return moneyFormat.format(obj)
 }
 
+@Suppress("DEPRECATION")
 fun checkForNewVersion(context: Context) {
     val storage = Firebase.storage
     val metadataFileName = "output-metadata.json"

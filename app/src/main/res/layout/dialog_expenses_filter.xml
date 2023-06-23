@@ -80,16 +80,18 @@
         android:layout_height="wrap_content"
         android:text="@string/title_categories" />
 
-    <HorizontalScrollView
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:paddingBottom="8dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="150dp">
 
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/expensesFilterCategory"
+            app:chipSpacingVertical="2dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-    </HorizontalScrollView>
+    </androidx.core.widget.NestedScrollView>
 
     <LinearLayout
         android:layout_width="match_parent"

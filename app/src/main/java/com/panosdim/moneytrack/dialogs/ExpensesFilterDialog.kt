@@ -169,6 +169,18 @@ class ExpensesFilterDialog : BottomSheetDialogFragment() {
             }
         }
 
+        binding.expensesFilterCategory.post {
+            binding.expensesFilterCategory.checkedChipIds.let {
+                try {
+                    val chip =
+                        binding.expensesFilterCategory.findViewById<Chip>(it.first())
+                    binding.nestedScrollView.scrollTo(0, chip.top)
+                } catch (e: NoSuchElementException) {
+                    binding.nestedScrollView.scrollTo(0, 0)
+                }
+            }
+        }
+
         binding.clearExpensesFilters.setOnClickListener {
             viewModel.clearFilters()
 

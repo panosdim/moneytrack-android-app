@@ -4,17 +4,16 @@ import android.os.Bundle
 import android.text.InputFilter
 import android.view.*
 import android.view.inputmethod.EditorInfo
-import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.viewModels
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.chip.Chip
 import com.google.android.material.datepicker.CalendarConstraints
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.panosdim.moneytrack.R
 import com.panosdim.moneytrack.api.data.Resource
 import com.panosdim.moneytrack.databinding.DialogExpenseBinding
-import com.panosdim.moneytrack.model.Category
 import com.panosdim.moneytrack.model.Expense
 import com.panosdim.moneytrack.utils.*
 import com.panosdim.moneytrack.viewmodel.ExpensesViewModel
@@ -104,26 +103,24 @@ class ExpenseDialog : BottomSheetDialogFragment() {
         }
 
         viewModel.categories.observe(viewLifecycleOwner) { list ->
-            val data = list.toMutableList()
-            data.sortByDescending { it.count }
-            val adapter = ArrayAdapter(
-                requireContext(),
-                R.layout.list_item,
-                data
-            )
-            binding.expenseCategory.setAdapter(adapter)
-        }
-
-        binding.expenseCategory.setOnItemClickListener { parent, _, position, _ ->
-            categoryId = (parent.getItemAtPosition(position) as Category).id
-            validateForm()
-        }
-
-        binding.expenseCategory.setOnFocusChangeListener { v, hasFocus ->
-            if (hasFocus) {
-                v.hideKeyboard()
-                binding.expenseCategory.showDropDown()
+            list.sortedByDescending { it.count }.forEach { category ->
+                val chip = layoutInflater.inflate(
+                    R.layout.row_chip_view,
+                    requireView().parent.parent as ViewGroup,
+                    false
+                ) as Chip
+                chip.text = category.category
+                chip.id = category.id!!
+                viewModel.filterCategory?.let {
+                    chip.isChecked = it.contains(chip.id)
+                }
+                binding.expenseCategory.addView(chip)
             }
+        }
+
+        binding.expenseCategory.setOnCheckedStateChangeListener { _, checkedIds ->
+            categoryId = checkedIds.first()
+            validateForm()
         }
 
         @Suppress("DEPRECATION")
@@ -139,8 +136,6 @@ class ExpenseDialog : BottomSheetDialogFragment() {
 
     override fun onPause() {
         super.onPause()
-        // Workaround as there is a bug in AutoCompleteView filter setting
-        binding.expenseCategory.setText("", false)
         dateSelected = LocalDate.now()
         categoryId = null
     }
@@ -169,6 +164,7 @@ class ExpenseDialog : BottomSheetDialogFragment() {
                             binding.deleteExpense.isEnabled = true
                             binding.saveExpense.isEnabled = true
                         }
+
                         is Resource.Error -> {
                             Toast.makeText(
                                 requireContext(),
@@ -179,6 +175,7 @@ class ExpenseDialog : BottomSheetDialogFragment() {
                             binding.deleteExpense.isEnabled = true
                             binding.saveExpense.isEnabled = true
                         }
+
                         is Resource.Loading -> {
                             binding.prgIndicator.visibility = View.VISIBLE
                             binding.deleteExpense.isEnabled = false
@@ -201,6 +198,7 @@ class ExpenseDialog : BottomSheetDialogFragment() {
                             binding.deleteExpense.isEnabled = true
                             binding.saveExpense.isEnabled = true
                         }
+
                         is Resource.Error -> {
                             Toast.makeText(
                                 requireContext(),
@@ -211,6 +209,7 @@ class ExpenseDialog : BottomSheetDialogFragment() {
                             binding.deleteExpense.isEnabled = true
                             binding.saveExpense.isEnabled = true
                         }
+
                         is Resource.Loading -> {
                             binding.prgIndicator.visibility = View.VISIBLE
                             binding.deleteExpense.isEnabled = false
@@ -240,6 +239,7 @@ class ExpenseDialog : BottomSheetDialogFragment() {
                         binding.deleteExpense.isEnabled = true
                         binding.saveExpense.isEnabled = true
                     }
+
                     is Resource.Error -> {
                         Toast.makeText(
                             requireContext(),
@@ -250,6 +250,7 @@ class ExpenseDialog : BottomSheetDialogFragment() {
                         binding.deleteExpense.isEnabled = true
                         binding.saveExpense.isEnabled = true
                     }
+
                     is Resource.Loading -> {
                         binding.prgIndicator.visibility = View.VISIBLE
                         binding.deleteExpense.isEnabled = false
@@ -267,7 +268,6 @@ class ExpenseDialog : BottomSheetDialogFragment() {
         saveExpense.isEnabled = true
         expenseDate.error = null
         expenseAmount.error = null
-        binding.expenseCategory.error = null
 
         // Store values.
         val date = expenseDate.text.toString()
@@ -287,7 +287,6 @@ class ExpenseDialog : BottomSheetDialogFragment() {
 
         // Check if category is selected
         if (categoryId == null) {
-            binding.expenseCategory.error = getString(R.string.error_field_required)
             saveExpense.isEnabled = false
         }
     }
@@ -303,9 +302,6 @@ class ExpenseDialog : BottomSheetDialogFragment() {
         binding.expenseAmount.removeTextChangedListener(textWatcher)
         binding.expenseAmount.error = null
 
-        binding.expenseCategory.removeTextChangedListener(textWatcher)
-        binding.expenseCategory.error = null
-
         binding.expenseComment.removeTextChangedListener(textWatcher)
         binding.expenseComment.error = null
 
@@ -316,8 +312,9 @@ class ExpenseDialog : BottomSheetDialogFragment() {
             binding.expenseAmount.addTextChangedListener(textWatcher)
             binding.expenseAmount.setText("")
             binding.expenseAmount.requestFocus()
-            binding.expenseCategory.addTextChangedListener(textWatcher)
-            binding.expenseCategory.setText("")
+            binding.expenseAmount.post {
+                binding.nestedScrollView.scrollTo(0, 0)
+            }
             binding.expenseComment.addTextChangedListener(textWatcher)
             binding.expenseComment.setText("")
             binding.deleteExpense.visibility = View.GONE
@@ -332,12 +329,12 @@ class ExpenseDialog : BottomSheetDialogFragment() {
             binding.expenseDate.setText(dateSelected.toShowDateFormat(expenseDateFormatter))
             binding.expenseAmount.setText(expItem.amount.toString())
             binding.expenseAmount.clearFocus()
-            binding.expenseCategory.setText(
-                getCategoryName(
-                    expItem.category,
-                    viewModel.categories
-                ), false
-            )
+            binding.expenseCategory.check(expItem.category)
+            binding.expenseCategory.post {
+                val chip =
+                    binding.expenseCategory.findViewById<Chip>(expItem.category)
+                binding.nestedScrollView.scrollTo(0, chip.top)
+            }
             binding.expenseComment.setText(expItem.comment)
             binding.deleteExpense.visibility = View.VISIBLE
             binding.saveExpense.setText(R.string.update)
@@ -350,7 +347,7 @@ class ExpenseDialog : BottomSheetDialogFragment() {
     private fun isFormValid(): Boolean {
         return binding.expenseDate.error == null &&
                 binding.expenseAmount.error == null &&
-                binding.expenseCategory.error == null
+                binding.expenseCategory.isSelected
     }
 
     companion object {

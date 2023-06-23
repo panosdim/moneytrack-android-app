@@ -1,6 +1,10 @@
 package com.panosdim.moneytrack.viewmodel
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.switchMap
 import com.panosdim.moneytrack.api.CategoriesRepository
 import com.panosdim.moneytrack.api.ExpensesRepository
 import com.panosdim.moneytrack.api.data.Resource
@@ -38,13 +42,13 @@ class ExpensesViewModel : ViewModel() {
         MutableLiveData<Boolean>().apply { this.value = false }
 
     val categories: LiveData<List<Category>> =
-        Transformations.switchMap(categoriesRepository.get()) { data ->
+        categoriesRepository.get().switchMap { data ->
             MutableLiveData<List<Category>>().apply {
                 this.value = data
             }
         }
     private var _expenses: LiveData<List<Expense>> =
-        Transformations.switchMap(expensesRepository.get()) { data ->
+        expensesRepository.get().switchMap { data ->
             MutableLiveData<List<Expense>>().apply {
                 this.value = data
             }
@@ -153,7 +157,7 @@ class ExpensesViewModel : ViewModel() {
 
     fun refreshExpenses(fetchAll: Boolean = false) {
         expenses.removeSource(_expenses)
-        _expenses = Transformations.switchMap(expensesRepository.get(fetchAll)) { data ->
+        _expenses = expensesRepository.get(fetchAll).switchMap { data ->
             MutableLiveData<List<Expense>>().apply {
                 this.value = data
             }

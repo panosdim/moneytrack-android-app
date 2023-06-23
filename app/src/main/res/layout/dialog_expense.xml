@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -39,26 +38,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
-            android:imeOptions="actionNext"
+            android:imeOptions="actionDone"
             android:selectAllOnFocus="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/category"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/nestedScrollView"
         android:paddingBottom="8dp"
-        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        android:layout_width="wrap_content"
+        android:fillViewport="true"
+        android:layout_height="150dp">
 
-        <AutoCompleteTextView
+        <com.google.android.material.chip.ChipGroup
             android:id="@+id/expenseCategory"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="none"
-            tools:ignore="LabelFor" />
-
-    </com.google.android.material.textfield.TextInputLayout>
+            app:chipSpacingVertical="2dp"
+            app:singleSelection="true"
+            app:selectionRequired="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+    </androidx.core.widget.NestedScrollView>
 
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"

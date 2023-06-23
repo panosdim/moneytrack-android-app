@@ -1,6 +1,10 @@
 package com.panosdim.moneytrack.viewmodel
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MediatorLiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.switchMap
 import com.panosdim.moneytrack.api.IncomeRepository
 import com.panosdim.moneytrack.api.data.Resource
 import com.panosdim.moneytrack.model.Income
@@ -28,7 +32,7 @@ class IncomeViewModel : ViewModel() {
         MutableLiveData<Boolean>().apply { this.value = false }
 
     private var _income: LiveData<List<Income>> =
-        Transformations.switchMap(incomeRepository.get()) { data ->
+        incomeRepository.get().switchMap { data ->
             MutableLiveData<List<Income>>().apply {
                 this.value = data
             }
@@ -118,7 +122,7 @@ class IncomeViewModel : ViewModel() {
 
     fun refreshIncome(fetchAll: Boolean = false) {
         income.removeSource(_income)
-        _income = Transformations.switchMap(incomeRepository.get(fetchAll)) { data ->
+        _income = incomeRepository.get(fetchAll).switchMap { data ->
             MutableLiveData<List<Income>>().apply {
                 this.value = data
             }
