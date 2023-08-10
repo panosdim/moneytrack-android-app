@@ -1,13 +1,13 @@
 package com.panosdim.moneytrack.db.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.panosdim.moneytrack.model.Category
+import com.panosdim.moneytrack.models.Category
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CategoryDao {
     @Query("SELECT * FROM Category")
-    fun get(): LiveData<List<Category>>
+    fun get(): Flow<List<Category>>
 
     @Insert
     suspend fun insert(category: Category)

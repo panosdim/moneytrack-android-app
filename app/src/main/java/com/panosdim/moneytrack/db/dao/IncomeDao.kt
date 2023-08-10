@@ -1,14 +1,17 @@
 package com.panosdim.moneytrack.db.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.panosdim.moneytrack.model.Income
+import com.panosdim.moneytrack.models.Income
 import com.panosdim.moneytrack.utils.currentMonth
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface IncomeDao {
     @Query("SELECT * FROM Income")
-    fun get(): LiveData<List<Income>>
+    fun get(): Flow<List<Income>>
+
+    @Query("SELECT (SELECT COUNT(*) FROM Income) == 0")
+    fun isEmpty(): Boolean
 
     @Insert
     suspend fun insert(income: Income)

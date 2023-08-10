@@ -1,14 +1,17 @@
 package com.panosdim.moneytrack.db.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.panosdim.moneytrack.model.Expense
+import com.panosdim.moneytrack.models.Expense
 import com.panosdim.moneytrack.utils.currentMonth
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ExpenseDao {
-    @Query("SELECT * FROM Expense")
-    fun get(): LiveData<List<Expense>>
+    @Query("SELECT * FROM Expense ORDER BY date DESC")
+    fun get(): Flow<List<Expense>>
+
+    @Query("SELECT (SELECT COUNT(*) FROM Expense) == 0")
+    fun isEmpty(): Boolean
 
     @Insert
     suspend fun insert(expense: Expense)
