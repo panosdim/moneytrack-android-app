@@ -15,10 +15,9 @@ android {
     defaultConfig {
         applicationId "com.panosdim.moneytrack"
         minSdk 30
-        //noinspection EditedTargetSdkVersion
         targetSdk 34
-        versionCode 33
-        versionName '7.0'
+        versionCode 34
+        versionName '7.1'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

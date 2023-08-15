@@ -23,6 +23,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +31,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -55,6 +58,13 @@ fun AddCategoryDialog(categories: List<Category>, open: Boolean, onClose: () -> 
         val viewModel: CategoriesViewModel = viewModel()
         val categoryName = remember { FieldState("") }
         val scope = rememberCoroutineScope()
+        val focusRequester = remember { FocusRequester() }
+
+        LaunchedEffect(Unit) {
+            if (categoryName.value.isEmpty()) {
+                focusRequester.requestFocus()
+            }
+        }
 
         var isLoading by remember {
             mutableStateOf(false)
@@ -135,6 +145,7 @@ fun AddCategoryDialog(categories: List<Category>, open: Boolean, onClose: () -> 
                         modifier = Modifier
                             .padding(bottom = paddingLarge)
                             .fillMaxWidth()
+                            .focusRequester(focusRequester)
                     )
 
                     if (isLoading) {
