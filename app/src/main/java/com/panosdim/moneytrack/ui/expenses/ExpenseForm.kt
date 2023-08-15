@@ -19,11 +19,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -48,6 +51,13 @@ fun ExpenseForm(
     validateCategory: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        if (expenseCategory.value == null) {
+            focusRequester.requestFocus()
+        }
+    }
 
     OutlinedDatePicker(
         state = datePickerState,
@@ -90,6 +100,7 @@ fun ExpenseForm(
         modifier = Modifier
             .padding(bottom = paddingLarge)
             .fillMaxWidth()
+            .focusRequester(focusRequester)
     )
 
     ExposedDropdownMenuBox(

@@ -11,7 +11,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -32,6 +36,14 @@ fun IncomeForm(
     incomeComment: FieldState<String>,
     validateAmount: () -> Unit
 ) {
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        if (incomeAmount.value.isEmpty()) {
+            focusRequester.requestFocus()
+        }
+    }
+
     OutlinedDatePicker(
         state = datePickerState,
         label = stringResource(id = R.string.date),
@@ -74,6 +86,7 @@ fun IncomeForm(
         modifier = Modifier
             .padding(bottom = paddingLarge)
             .fillMaxWidth()
+            .focusRequester(focusRequester)
     )
 
     OutlinedTextField(
