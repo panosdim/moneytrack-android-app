@@ -10,7 +10,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -62,7 +62,7 @@ fun NavigationGraph(navController: NavHostController, paddingValues: PaddingValu
 
 @Composable
 fun BottomNavigation(navController: NavController) {
-    var selectedItem by remember { mutableStateOf(0) }
+    var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf(
         BottomNavItem.Expenses,
         BottomNavItem.Income,
@@ -80,8 +80,8 @@ fun BottomNavigation(navController: NavController) {
                     selectedItem = index
                     navController.navigate(item.screenRoute) {
 
-                        navController.graph.startDestinationRoute?.let { screen_route ->
-                            popUpTo(screen_route) {
+                        navController.graph.startDestinationRoute?.let { screenRoute ->
+                            popUpTo(screenRoute) {
                                 saveState = true
                             }
                         }

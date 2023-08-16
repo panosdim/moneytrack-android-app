@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
         manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
         onComplete = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
-                val referenceId = intent!!.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+                val referenceId = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
                 if (referenceId != -1L && referenceId == refId) {
                     val apkUri = manager.getUriForDownloadedFile(refId)
                     val installIntent = Intent(Intent.ACTION_VIEW)
@@ -44,7 +44,6 @@ class MainActivity : ComponentActivity() {
                         Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
                     startActivity(installIntent)
                 }
-
             }
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -77,7 +76,7 @@ class MainActivity : ComponentActivity() {
 
         // Check for new version
         checkForNewVersion(this)
-        
+
         setContent {
             MoneyTrackTheme {
                 // A surface container using the 'background' color from the theme

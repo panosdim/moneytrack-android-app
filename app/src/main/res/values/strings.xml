@@ -9,7 +9,7 @@
     <string name="connection_timeout">Connection timeout</string>
     <string name="unknown_host">Unable to resolve host</string>
     <string name="title_activity_check_credentials">CheckCredentialsActivity</string>
-    <string name="new_version">New version found and is downloading on the background</string>
+    <string name="new_version">New version is downloading on the background</string>
     <string name="add_expense">New Expense</string>
     <string name="expenses_retrieving_error">Error retrieving expenses</string>
     <string name="sort">Sort</string>
