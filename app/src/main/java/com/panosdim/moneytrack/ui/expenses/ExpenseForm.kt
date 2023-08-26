@@ -16,6 +16,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -133,7 +134,12 @@ fun ExpenseForm(
         ) {
             categories.sortedByDescending { it.count }.forEach { selectionOption ->
                 DropdownMenuItem(
-                    text = { Text(selectionOption.category) },
+                    text = {
+                        Text(
+                            text = selectionOption.category,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    },
                     onClick = {
                         expenseCategory.value = selectionOption
                         expanded = false
@@ -151,7 +157,7 @@ fun ExpenseForm(
             .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(paddingLarge)
     ) {
-        categories.sortedByDescending { it.count }.take(6).forEach {
+        categories.sortedByDescending { it.count }.take(10).forEach {
             AssistChip(
                 onClick = { expenseCategory.value = it },
                 label = { Text(it.category) },

@@ -149,18 +149,22 @@ fun EditIncomeDialog(
         }
 
         fun isFormValid(): Boolean {
-            // Check if we change something in the object
-            datePickerState.selectedDateMillis?.toLocalDate()
-                ?.let { localDate ->
-                    if (income.date == localDate.toString() &&
-                        income.amount == incomeAmount.value.toFloat() &&
-                        income.comment == incomeComment.value
-                    ) {
-                        return false
+            if (incomeAmount.hasError) {
+                return false
+            } else {
+                // Check if we change something in the object
+                datePickerState.selectedDateMillis?.toLocalDate()
+                    ?.let { localDate ->
+                        if (income.date == localDate.toString() &&
+                            income.amount == incomeAmount.value.toFloat() &&
+                            income.comment == incomeComment.value
+                        ) {
+                            return false
+                        }
                     }
-                }
-
-            return !(incomeAmount.hasError)
+            }
+            
+            return true
         }
 
         validateAmount()

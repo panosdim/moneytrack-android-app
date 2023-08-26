@@ -159,21 +159,24 @@ fun EditExpenseDialog(
         }
 
         fun isFormValid(): Boolean {
-            // Check if we change something in the object
-            datePickerState.selectedDateMillis?.toLocalDate()
-                ?.let { localDate ->
-                    expenseCategory.value?.id?.let { categoryId ->
-                        if (expense.date == localDate.toString() &&
-                            expense.amount == expenseAmount.value.toFloat() &&
-                            expense.category == categoryId &&
-                            expense.comment == expenseComment.value
-                        ) {
-                            return false
+            if (expenseAmount.hasError || expenseCategory.hasError) {
+                return false
+            } else {
+                // Check if we change something in the object
+                datePickerState.selectedDateMillis?.toLocalDate()
+                    ?.let { localDate ->
+                        expenseCategory.value?.id?.let { categoryId ->
+                            if (expense.date == localDate.toString() &&
+                                expense.amount == expenseAmount.value.toFloat() &&
+                                expense.category == categoryId &&
+                                expense.comment == expenseComment.value
+                            ) {
+                                return false
+                            }
                         }
                     }
-                }
-
-            return !(expenseAmount.hasError || expenseCategory.hasError)
+            }
+            return true
         }
 
         validateAmount()
