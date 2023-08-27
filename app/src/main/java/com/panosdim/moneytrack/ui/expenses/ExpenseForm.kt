@@ -1,5 +1,6 @@
 package com.panosdim.moneytrack.ui.expenses
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -111,7 +112,8 @@ fun ExpenseForm(
         OutlinedTextField(
             modifier = Modifier
                 .menuAnchor()
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clickable(enabled = false) {},
             readOnly = true,
             value = expenseCategory.value?.category ?: "",
             onValueChange = { validateCategory() },
