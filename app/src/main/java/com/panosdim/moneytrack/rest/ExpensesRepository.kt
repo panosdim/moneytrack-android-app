@@ -7,7 +7,7 @@ import com.panosdim.moneytrack.db.dao.ExpenseDao
 import com.panosdim.moneytrack.models.ErrorDetails
 import com.panosdim.moneytrack.models.Expense
 import com.panosdim.moneytrack.models.Response
-import com.panosdim.moneytrack.utils.currentMonth
+import com.panosdim.moneytrack.utils.oneMonthBefore
 import io.ktor.client.call.body
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.request.delete
@@ -70,7 +70,7 @@ object ExpensesRepository {
                             client.get("expense") {
                                 contentType(ContentType.Application.Json)
                                 url {
-                                    parameters.append("after_date", currentMonth())
+                                    parameters.append("after_date", oneMonthBefore())
                                 }
                             }.body()
                         )

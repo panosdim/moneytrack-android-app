@@ -2,7 +2,7 @@ package com.panosdim.moneytrack.db.dao
 
 import androidx.room.*
 import com.panosdim.moneytrack.models.Income
-import com.panosdim.moneytrack.utils.currentMonth
+import com.panosdim.moneytrack.utils.oneMonthBefore
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -30,7 +30,7 @@ interface IncomeDao {
 
     @Transaction
     suspend fun deleteAndCreateMonth(income: List<Income>) {
-        deleteMonth(currentMonth())
+        deleteMonth(oneMonthBefore())
         insertAll(income)
     }
 

@@ -58,7 +58,7 @@ fun showRangeDate(startDateMilli: Long?, endDateMilli: Long?): String {
     } - ${endDateMilli.fromEpochMilli().format(dateFormatter)}"
 }
 
-fun currentMonth(): String {
+fun oneMonthBefore(): String {
     val dbDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    return LocalDate.now().withDayOfMonth(1).format(dbDateFormatter)
+    return LocalDate.now().minusMonths(1).format(dbDateFormatter)
 }
