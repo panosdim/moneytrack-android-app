@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.Flow
 class ExpensesViewModel : ViewModel() {
     val expenses = ExpensesRepository.get()
 
+    fun fetchAllExpenses(): Flow<List<Expense>> {
+        return ExpensesRepository.getAll()
+    }
+
     fun removeExpense(expense: Expense): Flow<Response<Unit>> {
         return ExpensesRepository.delete(expense)
     }

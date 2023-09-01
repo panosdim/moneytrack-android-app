@@ -14,10 +14,14 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -71,7 +75,7 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun IncomeScreen() {
     val context = LocalContext.current
@@ -176,12 +180,25 @@ fun IncomeScreen() {
         }
     }
 
+    val refreshing by remember { mutableStateOf(false) }
+    var isRefreshing by remember { mutableStateOf(false) }
+
+    fun refresh() = scope.launch {
+        isRefreshing = true
+        incomeViewModel.fetchAllIncome().collect {
+            incomeList = it
+            isRefreshing = false
+        }
+    }
+
+    val state = rememberPullRefreshState(refreshing, ::refresh)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .wrapContentSize(Alignment.Center)
     ) {
-        if (isLoading) {
+        if (isLoading || isRefreshing) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxSize()
@@ -240,120 +257,127 @@ fun IncomeScreen() {
                             }
                         }
                     }
+                    Box(Modifier.pullRefresh(state)) {
+                        // Show income
+                        LazyColumn(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(paddingLarge),
+                            contentPadding = contentPadding,
+                            state = listState
+                        ) {
+                            if (incomeSortField.value == IncomeSortField.DATE && searchText.isBlank() && !isFilterSet) {
+                                val data = sort(
+                                    incomeList,
+                                    incomeSortField.value,
+                                    sortDirection.value
+                                ).groupBy {
+                                    it.date.formatDate(
+                                        DateTimeFormatter.ofPattern("MMMM yyyy"),
+                                        false
+                                    )
+                                }
 
-                    // Show income
-                    LazyColumn(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(paddingLarge),
-                        contentPadding = contentPadding,
-                        state = listState
-                    ) {
-                        if (incomeSortField.value == IncomeSortField.DATE && searchText.isBlank() && !isFilterSet) {
-                            val data = sort(
-                                incomeList,
-                                incomeSortField.value,
-                                sortDirection.value
-                            ).groupBy {
-                                it.date.formatDate(
-                                    DateTimeFormatter.ofPattern("MMMM yyyy"),
-                                    false
-                                )
-                            }
-
-                            if (data.isNotEmpty()) {
-                                data.iterator().forEachRemaining {
+                                if (data.isNotEmpty()) {
+                                    data.iterator().forEachRemaining {
+                                        item {
+                                            IncomeCardAggByDate(it.key, it.value) {
+                                                income = it
+                                                openEditIncomeDialog = true
+                                            }
+                                        }
+                                    }
+                                } else {
                                     item {
-                                        IncomeCardAggByDate(it.key, it.value) {
-                                            income = it
-                                            openEditIncomeDialog = true
+                                        Column(
+                                            modifier = Modifier.fillMaxSize(),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Warning,
+                                                contentDescription = stringResource(id = R.string.no_income),
+                                                modifier = Modifier
+
+                                            )
+                                            Text(
+                                                text = stringResource(id = R.string.no_income)
+                                            )
                                         }
                                     }
                                 }
                             } else {
-                                item {
-                                    Column(
-                                        modifier = Modifier.fillMaxSize(),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Warning,
-                                            contentDescription = stringResource(id = R.string.no_income),
-                                            modifier = Modifier
+                                // Sort
+                                var data = sort(
+                                    incomeList,
+                                    incomeSortField.value,
+                                    sortDirection.value
+                                )
 
+                                // Filter
+                                data = filter(data, dateFilter.value)
+
+                                // Search
+                                if (searchText.isNotBlank()) {
+                                    data = data.filter {
+                                        it.comment.unaccent().contains(
+                                            searchText.unaccent().trim(),
+                                            ignoreCase = true
                                         )
+                                    }
+                                }
+
+                                if (data.isNotEmpty()) {
+                                    items(data) { incomeItem ->
+                                        IncomeListItem(incomeItem) {
+                                            income = it
+                                            openEditIncomeDialog = true
+                                        }
+                                    }
+
+                                    item {
+                                        // Calculate total cost
                                         Text(
-                                            text = stringResource(id = R.string.no_income)
-                                        )
-                                    }
-                                }
-                            }
-                        } else {
-                            // Sort
-                            var data = sort(
-                                incomeList,
-                                incomeSortField.value,
-                                sortDirection.value
-                            )
-
-                            // Filter
-                            data = filter(data, dateFilter.value)
-
-                            // Search
-                            if (searchText.isNotBlank()) {
-                                data = data.filter {
-                                    it.comment.unaccent().contains(
-                                        searchText.unaccent().trim(),
-                                        ignoreCase = true
-                                    )
-                                }
-                            }
-
-                            if (data.isNotEmpty()) {
-                                items(data) { incomeItem ->
-                                    IncomeListItem(incomeItem) {
-                                        income = it
-                                        openEditIncomeDialog = true
-                                    }
-                                }
-
-                                item {
-                                    // Calculate total cost
-                                    Text(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = paddingLarge),
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        text = resources.getString(
-                                            R.string.total,
-                                            moneyFormat(data.fold(0f) { acc, incomeDetails -> acc + incomeDetails.amount })
-                                        )
-                                    )
-                                }
-                            } else {
-                                item {
-                                    Column(
-                                        modifier = Modifier.fillMaxSize(),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Warning,
-                                            contentDescription = stringResource(id = R.string.no_income),
                                             modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = paddingLarge),
+                                            textAlign = TextAlign.Center,
+                                            style = MaterialTheme.typography.headlineMedium,
+                                            text = resources.getString(
+                                                R.string.total,
+                                                moneyFormat(data.fold(0f) { acc, incomeDetails -> acc + incomeDetails.amount })
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    item {
+                                        Column(
+                                            modifier = Modifier.fillMaxSize(),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Warning,
+                                                contentDescription = stringResource(id = R.string.no_income),
+                                                modifier = Modifier
 
-                                        )
-                                        Text(
-                                            text = stringResource(id = R.string.no_income)
-                                        )
+                                            )
+                                            Text(
+                                                text = stringResource(id = R.string.no_income)
+                                            )
+                                        }
                                     }
                                 }
                             }
+
+                            item { Spacer(modifier = Modifier.padding(bottom = 64.dp)) }
                         }
 
-                        item { Spacer(modifier = Modifier.padding(bottom = 64.dp)) }
+                        PullRefreshIndicator(
+                            refreshing,
+                            state,
+                            Modifier.align(Alignment.TopCenter)
+                        )
                     }
                 }
             }

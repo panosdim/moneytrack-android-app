@@ -14,10 +14,14 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -71,7 +75,8 @@ import io.ktor.client.request.setBody
 import io.ktor.http.contentType
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun ExpensesScreen() {
     val context = LocalContext.current
@@ -210,12 +215,25 @@ fun ExpensesScreen() {
         }
     }
 
+    val refreshing by remember { mutableStateOf(false) }
+    var isRefreshing by remember { mutableStateOf(false) }
+
+    fun refresh() = scope.launch {
+        isRefreshing = true
+        expensesViewModel.fetchAllExpenses().collect {
+            expenses = it
+            isRefreshing = false
+        }
+    }
+
+    val state = rememberPullRefreshState(refreshing, ::refresh)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .wrapContentSize(Alignment.Center)
     ) {
-        if (isLoading) {
+        if (isLoading || isRefreshing) {
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier.fillMaxSize()
@@ -275,116 +293,124 @@ fun ExpensesScreen() {
                         }
                     }
 
-                    // Show expenses
-                    LazyColumn(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(paddingLarge),
-                        contentPadding = contentPadding,
-                        state = listState
-                    ) {
-                        if (expenseSortField.value == ExpenseSortField.DATE && searchText.isBlank() && !isFilterSet) {
-                            val data = sort(
-                                expenses,
-                                categories,
-                                expenseSortField.value,
-                                sortDirection.value
-                            ).groupBy { it.date }
+                    Box(Modifier.pullRefresh(state)) {
+                        // Show expenses
+                        LazyColumn(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(paddingLarge),
+                            contentPadding = contentPadding,
+                            state = listState
+                        ) {
+                            if (expenseSortField.value == ExpenseSortField.DATE && searchText.isBlank() && !isFilterSet) {
+                                val data = sort(
+                                    expenses,
+                                    categories,
+                                    expenseSortField.value,
+                                    sortDirection.value
+                                ).groupBy { it.date }
 
-                            if (data.isNotEmpty()) {
-                                data.iterator().forEachRemaining {
+                                if (data.isNotEmpty()) {
+                                    data.iterator().forEachRemaining {
+                                        item {
+                                            ExpenseCardAggByDate(it.key, it.value, categories) {
+                                                expense = it
+                                                openEditExpenseDialog = true
+                                            }
+                                        }
+                                    }
+                                } else {
                                     item {
-                                        ExpenseCardAggByDate(it.key, it.value, categories) {
-                                            expense = it
-                                            openEditExpenseDialog = true
+                                        Column(
+                                            modifier = Modifier.fillMaxSize(),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Warning,
+                                                contentDescription = stringResource(id = R.string.no_expenses),
+                                                modifier = Modifier
+
+                                            )
+                                            Text(
+                                                text = stringResource(id = R.string.no_expenses)
+                                            )
                                         }
                                     }
                                 }
                             } else {
-                                item {
-                                    Column(
-                                        modifier = Modifier.fillMaxSize(),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Warning,
-                                            contentDescription = stringResource(id = R.string.no_expenses),
-                                            modifier = Modifier
+                                // Sort
+                                var data = sort(
+                                    expenses,
+                                    categories,
+                                    expenseSortField.value,
+                                    sortDirection.value
+                                )
 
+                                // Filter
+                                data = filter(data, dateFilter.value, categoryFilter.value)
+
+                                // Search
+                                if (searchText.isNotBlank()) {
+                                    data = data.filter {
+                                        it.comment.unaccent().contains(
+                                            searchText.unaccent().trim(),
+                                            ignoreCase = true
                                         )
+                                    }
+                                }
+
+                                if (data.isNotEmpty()) {
+                                    items(data) { expenseItem ->
+                                        ExpenseListItem(expenseItem, categories) {
+                                            expense = it
+                                            openEditExpenseDialog = true
+                                        }
+                                    }
+
+                                    item {
+                                        // Calculate total cost
                                         Text(
-                                            text = stringResource(id = R.string.no_expenses)
-                                        )
-                                    }
-                                }
-                            }
-                        } else {
-                            // Sort
-                            var data = sort(
-                                expenses,
-                                categories,
-                                expenseSortField.value,
-                                sortDirection.value
-                            )
-
-                            // Filter
-                            data = filter(data, dateFilter.value, categoryFilter.value)
-
-                            // Search
-                            if (searchText.isNotBlank()) {
-                                data = data.filter {
-                                    it.comment.unaccent().contains(
-                                        searchText.unaccent().trim(),
-                                        ignoreCase = true
-                                    )
-                                }
-                            }
-
-                            if (data.isNotEmpty()) {
-                                items(data) { expenseItem ->
-                                    ExpenseListItem(expenseItem, categories) {
-                                        expense = it
-                                        openEditExpenseDialog = true
-                                    }
-                                }
-
-                                item {
-                                    // Calculate total cost
-                                    Text(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(top = paddingLarge),
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.headlineMedium,
-                                        text = resources.getString(
-                                            R.string.total,
-                                            moneyFormat(data.fold(0f) { acc, expenseDetails -> acc + expenseDetails.amount })
-                                        )
-                                    )
-                                }
-                            } else {
-                                item {
-                                    Column(
-                                        modifier = Modifier.fillMaxSize(),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center
-                                    ) {
-                                        Icon(
-                                            Icons.Default.Warning,
-                                            contentDescription = stringResource(id = R.string.no_expenses),
                                             modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = paddingLarge),
+                                            textAlign = TextAlign.Center,
+                                            style = MaterialTheme.typography.headlineMedium,
+                                            text = resources.getString(
+                                                R.string.total,
+                                                moneyFormat(data.fold(0f) { acc, expenseDetails -> acc + expenseDetails.amount })
+                                            )
+                                        )
+                                    }
+                                } else {
+                                    item {
+                                        Column(
+                                            modifier = Modifier.fillMaxSize(),
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            Icon(
+                                                Icons.Default.Warning,
+                                                contentDescription = stringResource(id = R.string.no_expenses),
+                                                modifier = Modifier
 
-                                        )
-                                        Text(
-                                            text = stringResource(id = R.string.no_expenses)
-                                        )
+                                            )
+                                            Text(
+                                                text = stringResource(id = R.string.no_expenses)
+                                            )
+                                        }
                                     }
                                 }
                             }
+
+                            item { Spacer(modifier = Modifier.padding(bottom = 64.dp)) }
                         }
 
-                        item { Spacer(modifier = Modifier.padding(bottom = 64.dp)) }
+                        PullRefreshIndicator(
+                            refreshing,
+                            state,
+                            Modifier.align(Alignment.TopCenter)
+                        )
                     }
                 }
             }

@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.Flow
 class IncomeViewModel : ViewModel() {
     val income = IncomeRepository.get()
 
+    fun fetchAllIncome(): Flow<List<Income>> {
+        return IncomeRepository.getAll()
+    }
+
     fun removeIncome(income: Income): Flow<Response<Unit>> {
         return IncomeRepository.delete(income)
     }

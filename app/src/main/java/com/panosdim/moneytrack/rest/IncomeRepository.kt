@@ -32,6 +32,19 @@ import java.net.UnknownHostException
 object IncomeRepository {
     private val incomeDao: IncomeDao = db.incomeDao()
 
+    fun getAll(): Flow<List<Income>> {
+        return flow {
+            val incomeList = client.get("income") {
+                contentType(ContentType.Application.Json)
+            }.body<List<Income>>()
+            incomeDao.deleteAndCreateAll(
+                incomeList
+            )
+            emit(incomeList)
+        }
+            .flowOn(Dispatchers.IO)
+    }
+
     fun get(): Flow<Response<List<Income>>> {
         return channelFlow {
             send(Response.Loading)
