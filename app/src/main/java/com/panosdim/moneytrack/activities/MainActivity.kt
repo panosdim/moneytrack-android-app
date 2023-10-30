@@ -22,10 +22,14 @@ import com.panosdim.moneytrack.ui.MainScreen
 import com.panosdim.moneytrack.ui.theme.MoneyTrackTheme
 import com.panosdim.moneytrack.utils.checkForNewVersion
 import com.panosdim.moneytrack.utils.refId
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private lateinit var manager: DownloadManager
     private lateinit var onComplete: BroadcastReceiver
+    private val scope = CoroutineScope(Dispatchers.IO)
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,7 +79,9 @@ class MainActivity : ComponentActivity() {
         }
 
         // Check for new version
-        checkForNewVersion(this)
+        scope.launch {
+            checkForNewVersion(this@MainActivity)
+        }
 
         setContent {
             MoneyTrackTheme {
