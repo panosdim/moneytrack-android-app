@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -79,8 +80,13 @@ fun CategoriesScreen() {
     }
     var category: Category? by remember { mutableStateOf(null) }
 
-    var openAddCategoryDialog by remember { mutableStateOf(false) }
-    var openEditCategoryDialog by remember { mutableStateOf(false) }
+    val skipPartiallyExpanded by remember { mutableStateOf(true) }
+    val addCategorySheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = skipPartiallyExpanded
+    )
+    val editCategorySheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = skipPartiallyExpanded
+    )
 
     var isLoadingCategories by remember {
         mutableStateOf(false)
@@ -165,7 +171,7 @@ fun CategoriesScreen() {
             Scaffold(
                 floatingActionButton = {
                     ExtendedFloatingActionButton(
-                        onClick = { openAddCategoryDialog = true },
+                        onClick = { scope.launch { addCategorySheetState.show() } },
                         expanded = expandedFab,
                         icon = {
                             Icon(
@@ -256,7 +262,7 @@ fun CategoriesScreen() {
                                     },
                                     modifier = Modifier.clickable {
                                         category = categoryItem
-                                        scope.launch { openEditCategoryDialog = true }
+                                        scope.launch { editCategorySheetState.show() }
                                     }
                                 )
                                 HorizontalDivider()
@@ -285,17 +291,17 @@ fun CategoriesScreen() {
                 }
             }
 
-            AddCategoryDialog(
+            AddCategorySheet(
                 categories,
-                openAddCategoryDialog,
-            ) { openAddCategoryDialog = false }
+                bottomSheetState = addCategorySheetState,
+            )
 
             category?.let {
-                EditCategoryDialog(
+                EditCategorySheet(
                     it,
                     categories,
-                    openEditCategoryDialog,
-                ) { openEditCategoryDialog = false }
+                    bottomSheetState = editCategorySheetState,
+                )
             }
         }
     }

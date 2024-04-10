@@ -1,31 +1,27 @@
 package com.panosdim.moneytrack.ui.expenses
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EuroSymbol
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.DatePickerState
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -34,14 +30,17 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.panosdim.moneytrack.R
 import com.panosdim.moneytrack.models.Category
 import com.panosdim.moneytrack.models.FieldState
 import com.panosdim.moneytrack.paddingLarge
 import com.panosdim.moneytrack.ui.OutlinedDatePicker
 import com.panosdim.moneytrack.utils.currencyRegex
+import com.panosdim.moneytrack.utils.toEpochMilli
+import java.time.LocalDate
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ExpenseForm(
     categories: List<Category>,
@@ -51,8 +50,8 @@ fun ExpenseForm(
     expenseCategory: FieldState<Category?>,
     validateAmount: () -> Unit,
     validateCategory: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
+
+    ) {
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
@@ -68,6 +67,27 @@ fun ExpenseForm(
             .fillMaxWidth()
             .padding(bottom = paddingLarge)
     )
+    Row(
+        modifier = Modifier
+            .padding(bottom = paddingLarge)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        AssistChip(
+            onClick = {
+                val today = LocalDate.now()
+                datePickerState.selectedDateMillis = today.toEpochMilli()
+            },
+            label = { Text(stringResource(id = R.string.today)) },
+        )
+        AssistChip(
+            onClick = {
+                val yesterday = LocalDate.now().minusDays(1)
+                datePickerState.selectedDateMillis = yesterday.toEpochMilli()
+            },
+            label = { Text(stringResource(id = R.string.yesterday)) },
+        )
+    }
 
     OutlinedTextField(
         value = expenseAmount.value,
@@ -105,63 +125,38 @@ fun ExpenseForm(
             .focusRequester(focusRequester)
     )
 
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-    ) {
-        OutlinedTextField(
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-                .clickable(enabled = false) {},
-            readOnly = true,
-            value = expenseCategory.value?.category ?: "",
-            onValueChange = { validateCategory() },
-            label = { Text(stringResource(id = R.string.category)) },
-            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            isError = expenseCategory.hasError,
-            supportingText = {
-                if (expenseCategory.hasError) {
-                    Text(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = expenseCategory.errorMessage,
-                        textAlign = TextAlign.End,
-                    )
-                }
-            }
-        )
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false },
-        ) {
-            categories.sortedByDescending { it.count }.forEach { selectionOption ->
-                DropdownMenuItem(
-                    text = {
-                        Text(
-                            text = selectionOption.category,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    },
-                    onClick = {
-                        expenseCategory.value = selectionOption
-                        expanded = false
-                    },
-                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = false) {},
+        readOnly = true,
+        value = expenseCategory.value?.category ?: "",
+        onValueChange = { validateCategory() },
+        label = { Text(stringResource(id = R.string.category)) },
+        isError = expenseCategory.hasError,
+        supportingText = {
+            if (expenseCategory.hasError) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = expenseCategory.errorMessage,
+                    textAlign = TextAlign.End,
                 )
             }
         }
-    }
-
-    Row(
-        modifier = Modifier
-            .padding(bottom = paddingLarge)
+    )
+    FlowRow(
+        Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(paddingLarge)
+            .height(150.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = paddingLarge),
+        horizontalArrangement = Arrangement.spacedBy(paddingLarge),
     ) {
-        categories.sortedByDescending { it.count }.take(10).forEach {
+        categories.sortedByDescending { it.count }.forEach {
             AssistChip(
-                onClick = { expenseCategory.value = it },
+                onClick = {
+                    expenseCategory.value = it
+                },
                 label = { Text(it.category) },
             )
         }

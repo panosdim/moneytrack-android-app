@@ -100,8 +100,12 @@ fun ExpensesScreen() {
         skipPartiallyExpanded = skipPartiallyExpanded
     )
 
-    var openAddExpenseDialog by remember { mutableStateOf(false) }
-    var openEditExpenseDialog by remember { mutableStateOf(false) }
+    val addExpenseSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = skipPartiallyExpanded
+    )
+    val editExpenseSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = skipPartiallyExpanded
+    )
 
     val expenseSortField =
         expensesSortViewModel.expenseSortField.collectAsStateWithLifecycle(initialValue = ExpenseSortField.DATE)
@@ -246,7 +250,7 @@ fun ExpensesScreen() {
             Scaffold(
                 floatingActionButton = {
                     ExtendedFloatingActionButton(
-                        onClick = { openAddExpenseDialog = true },
+                        onClick = { scope.launch { addExpenseSheetState.show() } },
                         expanded = expandedFab,
                         icon = {
                             Icon(
@@ -315,7 +319,7 @@ fun ExpensesScreen() {
                                         item {
                                             ExpenseCardAggByDate(it.key, it.value, categories) {
                                                 expense = it
-                                                openEditExpenseDialog = true
+                                                scope.launch { editExpenseSheetState.show() }
                                             }
                                         }
                                     }
@@ -364,7 +368,7 @@ fun ExpensesScreen() {
                                     items(data) { expenseItem ->
                                         ExpenseListItem(expenseItem, categories) {
                                             expense = it
-                                            openEditExpenseDialog = true
+                                            scope.launch { editExpenseSheetState.show() }
                                         }
                                     }
 
@@ -416,10 +420,10 @@ fun ExpensesScreen() {
             }
 
             ExpensesSortSheet(bottomSheetState = expensesSortSheetState)
-            AddExpenseDialog(
+            AddExpenseSheet(
                 categories,
-                openAddExpenseDialog,
-            ) { openAddExpenseDialog = false }
+                bottomSheetState = addExpenseSheetState,
+            )
 
             ExpensesFilterSheet(
                 bottomSheetState = expensesFilterSheetState,
@@ -427,11 +431,11 @@ fun ExpensesScreen() {
             )
 
             expense?.let {
-                EditExpenseDialog(
+                EditExpenseSheet(
                     it,
                     categories,
-                    openEditExpenseDialog
-                ) { openEditExpenseDialog = false }
+                    bottomSheetState = editExpenseSheetState,
+                )
             }
         }
     }

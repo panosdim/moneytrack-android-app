@@ -98,8 +98,12 @@ fun IncomeScreen() {
         skipPartiallyExpanded = skipPartiallyExpanded
     )
 
-    var openAddIncomeDialog by remember { mutableStateOf(false) }
-    var openEditIncomeDialog by remember { mutableStateOf(false) }
+    val addIncomeSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = skipPartiallyExpanded
+    )
+    val editIncomeSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = skipPartiallyExpanded
+    )
 
     val incomeSortField =
         incomeSortViewModel.incomeSortField.collectAsStateWithLifecycle(initialValue = IncomeSortField.DATE)
@@ -211,7 +215,7 @@ fun IncomeScreen() {
             Scaffold(
                 floatingActionButton = {
                     ExtendedFloatingActionButton(
-                        onClick = { openAddIncomeDialog = true },
+                        onClick = { scope.launch { addIncomeSheetState.show() } },
                         expanded = expandedFab,
                         icon = {
                             Icon(
@@ -283,7 +287,7 @@ fun IncomeScreen() {
                                         item {
                                             IncomeCardAggByDate(it.key, it.value) {
                                                 income = it
-                                                openEditIncomeDialog = true
+                                                scope.launch { editIncomeSheetState.show() }
                                             }
                                         }
                                     }
@@ -331,7 +335,7 @@ fun IncomeScreen() {
                                     items(data) { incomeItem ->
                                         IncomeListItem(incomeItem) {
                                             income = it
-                                            openEditIncomeDialog = true
+                                            scope.launch { editIncomeSheetState.show() }
                                         }
                                     }
 
@@ -383,17 +387,15 @@ fun IncomeScreen() {
             }
 
             IncomeSortSheet(bottomSheetState = incomeSortSheetState)
-            AddIncomeDialog(
-                openAddIncomeDialog,
-            ) { openAddIncomeDialog = false }
+            AddIncomeSheet(bottomSheetState = addIncomeSheetState)
 
             IncomeFilterSheet(bottomSheetState = incomeFilterSheetState)
 
             income?.let {
-                EditIncomeDialog(
+                EditIncomeSheet(
                     it,
-                    openEditIncomeDialog
-                ) { openEditIncomeDialog = false }
+                    bottomSheetState = editIncomeSheetState
+                )
             }
         }
     }

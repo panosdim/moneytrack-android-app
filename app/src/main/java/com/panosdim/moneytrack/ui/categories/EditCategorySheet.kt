@@ -6,24 +6,24 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -40,7 +40,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.panosdim.moneytrack.App
 import com.panosdim.moneytrack.R
@@ -52,14 +51,14 @@ import com.panosdim.moneytrack.utils.removeEmojis
 import com.panosdim.moneytrack.viewmodels.CategoriesViewModel
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditCategoryDialog(
+fun EditCategorySheet(
     categoryItem: Category,
     categories: List<Category>,
-    open: Boolean,
-    onClose: () -> Unit
+    bottomSheetState: SheetState,
 ) {
-    if (open) {
+    if (bottomSheetState.isVisible) {
         val context = LocalContext.current
         val viewModel: CategoriesViewModel = viewModel()
         val categoryName = remember { FieldState(categoryItem.category) }
@@ -98,7 +97,9 @@ fun EditCategoryDialog(
                                                 Toast.LENGTH_LONG
                                             ).show()
 
-                                            onClose()
+                                            scope.launch {
+                                                bottomSheetState.hide()
+                                            }
                                         }
 
                                         is Response.Error -> {
@@ -165,131 +166,125 @@ fun EditCategoryDialog(
 
         validateCategory()
 
-        Dialog(
-            onDismissRequest = {
-                onClose()
-            }
+        ModalBottomSheet(
+            onDismissRequest = { scope.launch { bottomSheetState.hide() } },
+            sheetState = bottomSheetState,
         ) {
-            Surface(
+            Column(
                 modifier = Modifier
-                    .wrapContentWidth()
-                    .wrapContentHeight(),
-                shape = MaterialTheme.shapes.large,
-                tonalElevation = AlertDialogDefaults.TonalElevation
+                    .padding(paddingLarge)
+                    .navigationBarsPadding(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
+                Text(
+                    stringResource(
+                        id = R.string.edit_category
+                    ),
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                OutlinedTextField(
+                    value = categoryName.value,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Text,
+                        capitalization =
+                        KeyboardCapitalization.Words,
+                        imeAction = ImeAction.Done
+                    ),
+                    singleLine = true,
+                    isError = categoryName.hasError,
+                    supportingText = {
+                        if (categoryName.hasError) {
+                            Text(
+                                modifier = Modifier.fillMaxWidth(),
+                                text = categoryName.errorMessage,
+                                textAlign = TextAlign.End,
+                            )
+                        }
+                    },
+                    onValueChange = {
+                        categoryName.value = it
+                        validateCategory()
+                    },
+                    label = { Text(stringResource(id = R.string.category_name)) },
                     modifier = Modifier
-                        .padding(paddingLarge),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        stringResource(
-                            id = R.string.edit_category
-                        ),
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                    OutlinedTextField(
-                        value = categoryName.value,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Text,
-                            capitalization =
-                            KeyboardCapitalization.Words,
-                            imeAction = ImeAction.Done
-                        ),
-                        singleLine = true,
-                        isError = categoryName.hasError,
-                        supportingText = {
-                            if (categoryName.hasError) {
-                                Text(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    text = categoryName.errorMessage,
-                                    textAlign = TextAlign.End,
-                                )
-                            }
-                        },
-                        onValueChange = {
-                            categoryName.value = it
-                            validateCategory()
-                        },
-                        label = { Text(stringResource(id = R.string.category_name)) },
-                        modifier = Modifier
-                            .padding(bottom = paddingLarge)
-                            .fillMaxWidth()
-                    )
+                        .padding(bottom = paddingLarge)
+                        .fillMaxWidth()
+                )
 
-                    if (isLoading) {
-                        LinearProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = paddingLarge)
+                if (isLoading) {
+                    LinearProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = paddingLarge)
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    OutlinedButton(
+                        onClick = { openDeleteDialog.value = true },
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
                         )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(id = R.string.delete))
                     }
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    ) {
-                        OutlinedButton(
-                            onClick = { openDeleteDialog.value = true },
-                        ) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = null,
-                                modifier = Modifier.size(ButtonDefaults.IconSize)
-                            )
-                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text(stringResource(id = R.string.delete))
-                        }
+                    Button(
+                        enabled = isFormValid(),
+                        onClick = {
+                            categoryItem.category = categoryName.value
 
-                        Button(
-                            enabled = isFormValid(),
-                            onClick = {
-                                categoryItem.category = categoryName.value
+                            scope.launch {
+                                viewModel.updateCategory(categoryItem).collect {
+                                    when (it) {
+                                        is Response.Success -> {
+                                            isLoading = false
 
-                                scope.launch {
-                                    viewModel.updateCategory(categoryItem).collect {
-                                        when (it) {
-                                            is Response.Success -> {
-                                                isLoading = false
+                                            Toast.makeText(
+                                                context, R.string.category_updated,
+                                                Toast.LENGTH_LONG
+                                            ).show()
 
-                                                Toast.makeText(
-                                                    context, R.string.category_updated,
-                                                    Toast.LENGTH_LONG
-                                                ).show()
-
-                                                onClose()
+                                            scope.launch {
+                                                bottomSheetState.hide()
                                             }
+                                        }
 
-                                            is Response.Error -> {
-                                                Toast.makeText(
-                                                    context,
-                                                    it.errorMessage,
-                                                    Toast.LENGTH_SHORT
-                                                )
-                                                    .show()
+                                        is Response.Error -> {
+                                            Toast.makeText(
+                                                context,
+                                                it.errorMessage,
+                                                Toast.LENGTH_SHORT
+                                            )
+                                                .show()
 
-                                                isLoading = false
-                                            }
+                                            isLoading = false
+                                        }
 
-                                            is Response.Loading -> {
-                                                isLoading = true
-                                            }
+                                        is Response.Loading -> {
+                                            isLoading = true
                                         }
                                     }
                                 }
-                            },
-                        ) {
-                            Icon(
-                                Icons.Default.Save,
-                                contentDescription = null,
-                                modifier = Modifier.size(ButtonDefaults.IconSize)
-                            )
-                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text(stringResource(id = R.string.update))
-                        }
+                            }
+                        },
+                    ) {
+                        Icon(
+                            Icons.Default.Save,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(id = R.string.update))
                     }
                 }
             }

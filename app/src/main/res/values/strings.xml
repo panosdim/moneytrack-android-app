@@ -83,4 +83,7 @@
     <string name="month_savings">Month</string>
     <string name="year_savings">Year</string>
     <string name="five_biggest_expenses">5 greater expenses</string>
+    <string name="today">Today</string>
+    <string name="yesterday">Yesterday</string>
+    <string name="total_savings">Total Savings</string>
 </resources>

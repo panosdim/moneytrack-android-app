@@ -1,5 +1,4 @@
-package com.panosdim.moneytrack.ui.income
-
+package com.panosdim.moneytrack.ui.expenses
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -7,23 +6,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Surface
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -37,37 +35,38 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.panosdim.moneytrack.App
 import com.panosdim.moneytrack.R
+import com.panosdim.moneytrack.models.Category
+import com.panosdim.moneytrack.models.Expense
 import com.panosdim.moneytrack.models.FieldState
-import com.panosdim.moneytrack.models.Income
 import com.panosdim.moneytrack.models.Response
 import com.panosdim.moneytrack.paddingLarge
 import com.panosdim.moneytrack.utils.toEpochMilli
 import com.panosdim.moneytrack.utils.toLocalDate
-import com.panosdim.moneytrack.viewmodels.IncomeViewModel
+import com.panosdim.moneytrack.viewmodels.ExpensesViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditIncomeDialog(
-    income: Income,
-    open: Boolean,
-    onClose: () -> Unit
+fun EditExpenseSheet(
+    expense: Expense,
+    categories: List<Category>,
+    bottomSheetState: SheetState,
 ) {
-    if (open) {
+    if (bottomSheetState.isVisible) {
         val context = LocalContext.current
-        val viewModel: IncomeViewModel = viewModel()
+        val viewModel: ExpensesViewModel = viewModel()
         val scope = rememberCoroutineScope()
         val openDeleteDialog = remember { mutableStateOf(false) }
 
-        val incomeComment = remember { FieldState(income.comment) }
-        val incomeAmount = remember { FieldState(income.amount.toString()) }
-        val incomeDate by remember { mutableStateOf(income.date.toLocalDate()) }
+        val expenseComment = remember { FieldState(expense.comment) }
+        val expenseAmount = remember { FieldState(expense.amount.toString()) }
+        val expenseDate by remember { mutableStateOf(expense.date.toLocalDate()) }
         val datePickerState =
-            rememberDatePickerState(initialSelectedDateMillis = incomeDate.toEpochMilli())
+            rememberDatePickerState(initialSelectedDateMillis = expenseDate.toEpochMilli())
+        val expenseCategory = remember { FieldState(categories.find { it.id == expense.category }) }
 
         var isLoading by remember {
             mutableStateOf(false)
@@ -79,11 +78,11 @@ fun EditIncomeDialog(
                     openDeleteDialog.value = false
                 },
                 title = {
-                    Text(text = stringResource(id = R.string.delete_income_dialog_title))
+                    Text(text = stringResource(id = R.string.delete_expense_dialog_title))
                 },
                 text = {
                     Text(
-                        stringResource(id = R.string.delete_income_dialog_description)
+                        stringResource(id = R.string.delete_expense_dialog_description)
                     )
                 },
                 confirmButton = {
@@ -92,17 +91,19 @@ fun EditIncomeDialog(
                             openDeleteDialog.value = false
 
                             scope.launch {
-                                viewModel.removeIncome(income).collect {
+                                viewModel.removeExpense(expense).collect {
                                     when (it) {
                                         is Response.Success -> {
                                             isLoading = false
 
                                             Toast.makeText(
-                                                context, R.string.delete_income_toast,
+                                                context, R.string.delete_expense_toast,
                                                 Toast.LENGTH_LONG
                                             ).show()
 
-                                            onClose()
+                                            scope.launch {
+                                                bottomSheetState.hide()
+                                            }
                                         }
 
                                         is Response.Error -> {
@@ -140,112 +141,124 @@ fun EditIncomeDialog(
         }
 
         fun validateAmount() {
-            if (incomeAmount.value != income.amount.toString()) {
-                incomeAmount.removeError()
-                if (incomeAmount.value.isEmpty()) {
-                    incomeAmount.setError(App.instance.getString(R.string.amount_error_empty))
+            if (expenseAmount.value != expense.amount.toString()) {
+                expenseAmount.removeError()
+                if (expenseAmount.value.isEmpty()) {
+                    expenseAmount.setError(App.instance.getString(R.string.amount_error_empty))
                 }
             }
         }
 
+        fun validateCategory() {
+            expenseCategory.removeError()
+            // Check if category is selected
+            if (expenseCategory.value == null) {
+                expenseCategory.setError(App.instance.getString(R.string.category_error_not_selected))
+            }
+        }
+
         fun isFormValid(): Boolean {
-            if (incomeAmount.hasError) {
+            if (expenseAmount.hasError || expenseCategory.hasError) {
                 return false
             } else {
                 // Check if we change something in the object
                 datePickerState.selectedDateMillis?.toLocalDate()
                     ?.let { localDate ->
-                        if (income.date == localDate.toString() &&
-                            income.amount == incomeAmount.value.toFloat() &&
-                            income.comment == incomeComment.value
-                        ) {
-                            return false
+                        expenseCategory.value?.id?.let { categoryId ->
+                            if (expense.date == localDate.toString() &&
+                                expense.amount == expenseAmount.value.toFloat() &&
+                                expense.category == categoryId &&
+                                expense.comment == expenseComment.value
+                            ) {
+                                return false
+                            }
                         }
                     }
             }
-            
             return true
         }
 
         validateAmount()
+        validateCategory()
 
-        Dialog(
-            onDismissRequest = {
-                onClose()
-            }
+        ModalBottomSheet(
+            onDismissRequest = { scope.launch { bottomSheetState.hide() } },
+            sheetState = bottomSheetState,
         ) {
-            Surface(
+            Column(
                 modifier = Modifier
-                    .wrapContentWidth()
-                    .wrapContentHeight(),
-                shape = MaterialTheme.shapes.large,
-                tonalElevation = AlertDialogDefaults.TonalElevation
+                    .padding(paddingLarge)
+                    .navigationBarsPadding(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(paddingLarge),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        stringResource(
-                            id = R.string.edit_income
-                        ),
-                        style = MaterialTheme.typography.headlineMedium
-                    )
+                Text(
+                    stringResource(id = R.string.edit_expense),
+                    style = MaterialTheme.typography.headlineMedium
+                )
 
-                    IncomeForm(datePickerState, incomeAmount, incomeComment) {
-                        validateAmount()
-                    }
+                ExpenseForm(
+                    categories,
+                    datePickerState,
+                    expenseAmount,
+                    expenseComment,
+                    expenseCategory,
+                    { validateAmount() },
+                    { validateCategory() }
+                )
 
-                    if (isLoading) {
-                        LinearProgressIndicator(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = paddingLarge)
-                        )
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                if (isLoading) {
+                    LinearProgressIndicator(
                         modifier = Modifier
                             .fillMaxWidth()
-                    ) {
-                        OutlinedButton(
-                            onClick = { openDeleteDialog.value = true },
-                        ) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = null,
-                                modifier = Modifier.size(ButtonDefaults.IconSize)
-                            )
-                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text(stringResource(id = R.string.delete))
-                        }
+                            .padding(bottom = paddingLarge)
+                    )
+                }
 
-                        Button(
-                            enabled = isFormValid() && !isLoading,
-                            onClick = {
-                                datePickerState.selectedDateMillis?.toLocalDate()
-                                    ?.let { localDate ->
-                                        // Update income object
-                                        income.date = localDate.toString()
-                                        income.amount = incomeAmount.value.toFloat()
-                                        income.comment = incomeComment.value
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    OutlinedButton(
+                        onClick = { openDeleteDialog.value = true },
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(id = R.string.delete))
+                    }
+
+                    Button(
+                        enabled = isFormValid() && !isLoading,
+                        onClick = {
+                            datePickerState.selectedDateMillis?.toLocalDate()
+                                ?.let { localDate ->
+                                    expenseCategory.value?.id?.let { categoryId ->
+                                        // Update expense object
+                                        expense.date = localDate.toString()
+                                        expense.amount = expenseAmount.value.toFloat()
+                                        expense.category = categoryId
+                                        expense.comment = expenseComment.value
 
                                         scope.launch {
-                                            viewModel.updateIncome(income).collect {
+                                            viewModel.updateExpense(expense).collect {
                                                 when (it) {
                                                     is Response.Success -> {
                                                         isLoading = false
 
                                                         Toast.makeText(
-                                                            context, R.string.income_updated,
+                                                            context, R.string.expense_updated,
                                                             Toast.LENGTH_LONG
                                                         ).show()
 
-                                                        onClose()
+                                                        scope.launch {
+                                                            bottomSheetState.hide()
+                                                        }
                                                     }
 
                                                     is Response.Error -> {
@@ -266,16 +279,16 @@ fun EditIncomeDialog(
                                             }
                                         }
                                     }
-                            },
-                        ) {
-                            Icon(
-                                Icons.Filled.Save,
-                                contentDescription = null,
-                                modifier = Modifier.size(ButtonDefaults.IconSize)
-                            )
-                            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                            Text(stringResource(id = R.string.update))
-                        }
+                                }
+                        },
+                    ) {
+                        Icon(
+                            Icons.Filled.Save,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize)
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(id = R.string.update))
                     }
                 }
             }

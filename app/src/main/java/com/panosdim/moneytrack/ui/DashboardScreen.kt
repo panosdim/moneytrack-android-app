@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,6 +33,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -93,10 +95,12 @@ fun DashboardScreen() {
     var startOfYear by remember { mutableStateOf(today.withDayOfMonth(1).withMonth(1)) }
     var endOfYear by remember { mutableStateOf(today.withMonth(12).withDayOfMonth(31)) }
     var selectedMonth by remember { mutableStateOf(today.month) }
-    var selectedYear by remember { mutableStateOf(today.year) }
+    var selectedYear by remember { mutableIntStateOf(today.year) }
 
     var totalMonthSavings by remember { mutableStateOf(BigDecimal(0)) }
     var totalYearSavings by remember { mutableStateOf(BigDecimal(0)) }
+
+    var totalSavings by remember { mutableStateOf(BigDecimal(0)) }
 
     var monthExpensesPerCategories by remember { mutableStateOf(emptyList<Pair<Float, String>>()) }
     var expensesOnCategory: List<Expense> by remember {
@@ -184,6 +188,10 @@ fun DashboardScreen() {
         }.sumOf { it.amount.toBigDecimal() }
 
         totalYearSavings = totalYearIncome - totalYearExpenses
+
+        val totalIncome = income.sumOf { it.amount.toBigDecimal() }
+        val totalExpenses = expenses.sumOf { it.amount.toBigDecimal() }
+        totalSavings = totalIncome - totalExpenses
     }
 
     if (!isTokenExpired) {
@@ -442,6 +450,27 @@ fun DashboardScreen() {
                                 }
                             )
                         }
+                    }
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.total_savings),
+                            style = MaterialTheme.typography.headlineSmall,
+                        )
+                        Spacer(modifier = Modifier.padding(horizontal = paddingSmall))
+                        Text(
+                            text = moneyFormat(totalSavings),
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = if (totalSavings > BigDecimal(0)) {
+                                IncomeColor
+                            } else {
+                                ExpenseColor
+                            }
+                        )
                     }
                 }
             }
