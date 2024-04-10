@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +40,7 @@ fun <T> HeaderBar(
     ) {
         TextButton(onClick = { onSort() }) {
             Icon(
-                Icons.Default.Sort,
+                Icons.AutoMirrored.Filled.Sort,
                 contentDescription = null,
                 modifier = Modifier.size(ButtonDefaults.IconSize)
             )

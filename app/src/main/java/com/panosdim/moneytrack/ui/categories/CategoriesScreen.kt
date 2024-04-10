@@ -20,9 +20,9 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -259,7 +259,7 @@ fun CategoriesScreen() {
                                         scope.launch { openEditCategoryDialog = true }
                                     }
                                 )
-                                Divider()
+                                HorizontalDivider()
                             }
                         } else {
                             item {

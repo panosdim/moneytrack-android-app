@@ -20,9 +20,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Login
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.outlined.Login
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
@@ -58,8 +58,8 @@ import com.panosdim.moneytrack.models.Response
 import com.panosdim.moneytrack.paddingExtraLarge
 import com.panosdim.moneytrack.paddingLarge
 import com.panosdim.moneytrack.prefs
-import com.panosdim.moneytrack.ui.theme.MoneyTrackTheme
 import com.panosdim.moneytrack.ui.AppLogo
+import com.panosdim.moneytrack.ui.theme.MoneyTrackTheme
 import com.panosdim.moneytrack.viewmodels.LoginViewModel
 import kotlinx.coroutines.launch
 
@@ -294,7 +294,7 @@ class LoginActivity : ComponentActivity() {
                                     onClick = { login() },
                                 ) {
                                     Icon(
-                                        Icons.Outlined.Login,
+                                        Icons.AutoMirrored.Outlined.Login,
                                         contentDescription = null,
                                         modifier = Modifier.size(ButtonDefaults.IconSize)
                                     )

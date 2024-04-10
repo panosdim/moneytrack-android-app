@@ -18,12 +18,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -108,7 +108,7 @@ fun DashboardScreen() {
     val categoriesViewModel: CategoriesViewModel = viewModel()
     val incomeViewModel: IncomeViewModel = viewModel()
 
-    val optionsMonth = Month.values()
+    val optionsMonth = Month.entries.toTypedArray()
     val optionsYear =
         expensesViewModel.years().collectAsStateWithLifecycle(initialValue = emptyList())
     var expandedMonth by remember { mutableStateOf(false) }
@@ -504,7 +504,7 @@ fun DashboardScreen() {
                             }
                         }
                     )
-                    Divider()
+                    HorizontalDivider()
                 }
             }
         }

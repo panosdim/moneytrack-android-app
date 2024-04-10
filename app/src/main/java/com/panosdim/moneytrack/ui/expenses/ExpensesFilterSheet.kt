@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material.icons.filled.FilterAltOff
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedFilterChip
@@ -34,7 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -52,13 +50,13 @@ import com.panosdim.moneytrack.viewmodels.ExpensesFilterViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ExpensesFilterSheet(
     bottomSheetState: SheetState,
     categories: List<Category>
 ) {
-    val edgeToEdgeEnabled by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val expensesFilterViewModel: ExpensesFilterViewModel = viewModel()
 
@@ -90,18 +88,15 @@ fun ExpensesFilterSheet(
             }
         }
 
-        val windowInsets = if (edgeToEdgeEnabled)
-            WindowInsets(0) else BottomSheetDefaults.windowInsets
-
         ModalBottomSheet(
             onDismissRequest = { scope.launch { bottomSheetState.hide() } },
             sheetState = bottomSheetState,
-            windowInsets = windowInsets
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = paddingLarge, end = paddingLarge)
+                    .navigationBarsPadding()
             ) {
                 OutlinedDateRangePicker(
                     state = dateRangePickerState,

@@ -2,13 +2,12 @@ package com.panosdim.moneytrack.ui.income
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.SwapVert
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,7 +38,6 @@ import kotlinx.coroutines.launch
 fun IncomeSortSheet(
     bottomSheetState: SheetState
 ) {
-    val edgeToEdgeEnabled by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val incomeSortViewModel: IncomeSortViewModel = viewModel()
 
@@ -56,18 +54,15 @@ fun IncomeSortSheet(
 
     // Sheet content
     if (bottomSheetState.isVisible) {
-        val windowInsets = if (edgeToEdgeEnabled)
-            WindowInsets(0) else BottomSheetDefaults.windowInsets
-
         ModalBottomSheet(
             onDismissRequest = { scope.launch { bottomSheetState.hide() } },
             sheetState = bottomSheetState,
-            windowInsets = windowInsets
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = paddingLarge, end = paddingLarge),
+                    .padding(start = paddingLarge, end = paddingLarge)
+                    .navigationBarsPadding(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -80,7 +75,7 @@ fun IncomeSortSheet(
                             .menuAnchor(),
                         selected = false,
                         onClick = { },
-                        leadingIcon = { Icon(Icons.Default.Sort, "Sort Field") },
+                        leadingIcon = { Icon(Icons.AutoMirrored.Filled.Sort, "Sort Field") },
                         label = { Text(selectedFieldText.value.title) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedField) },
                     )
