@@ -199,8 +199,7 @@ fun EditIncomeSheet(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     OutlinedButton(
                         onClick = { openDeleteDialog.value = true },

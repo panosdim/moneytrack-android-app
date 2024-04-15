@@ -25,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -50,9 +51,9 @@ fun ExpenseForm(
     expenseCategory: FieldState<Category?>,
     validateAmount: () -> Unit,
     validateCategory: () -> Unit,
-
-    ) {
+) {
     val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     LaunchedEffect(Unit) {
         if (expenseCategory.value == null) {
@@ -147,7 +148,7 @@ fun ExpenseForm(
     FlowRow(
         Modifier
             .fillMaxWidth()
-            .height(150.dp)
+            .height(200.dp)
             .verticalScroll(rememberScrollState())
             .padding(bottom = paddingLarge),
         horizontalArrangement = Arrangement.spacedBy(paddingLarge),
@@ -156,6 +157,7 @@ fun ExpenseForm(
             AssistChip(
                 onClick = {
                     expenseCategory.value = it
+                    keyboardController?.hide()
                 },
                 label = { Text(it.category) },
             )
@@ -166,8 +168,7 @@ fun ExpenseForm(
         value = expenseComment.value,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Text,
-            capitalization =
-            KeyboardCapitalization.Words,
+            capitalization = KeyboardCapitalization.Words,
             imeAction = ImeAction.Done
         ),
         singleLine = true,

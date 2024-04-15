@@ -187,8 +187,7 @@ fun EditCategorySheet(
                     value = categoryName.value,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
-                        capitalization =
-                        KeyboardCapitalization.Words,
+                        capitalization = KeyboardCapitalization.Words,
                         imeAction = ImeAction.Done
                     ),
                     singleLine = true,
@@ -223,8 +222,7 @@ fun EditCategorySheet(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     OutlinedButton(
                         onClick = { openDeleteDialog.value = true },

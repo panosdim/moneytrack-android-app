@@ -93,8 +93,7 @@ fun IncomeForm(
         value = incomeComment.value,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Text,
-            capitalization =
-            KeyboardCapitalization.Words,
+            capitalization = KeyboardCapitalization.Words,
             imeAction = ImeAction.Done
         ),
         singleLine = true,

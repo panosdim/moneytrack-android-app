@@ -113,8 +113,7 @@ fun AddCategorySheet(categories: List<Category>, bottomSheetState: SheetState) {
                     value = categoryName.value,
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Text,
-                        capitalization =
-                        KeyboardCapitalization.Words,
+                        capitalization = KeyboardCapitalization.Words,
                         imeAction = ImeAction.Done
                     ),
                     singleLine = true,
@@ -150,8 +149,7 @@ fun AddCategorySheet(categories: List<Category>, bottomSheetState: SheetState) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Button(
                         enabled = isFormValid() && !isLoading,

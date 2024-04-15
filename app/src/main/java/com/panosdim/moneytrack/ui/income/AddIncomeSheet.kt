@@ -106,8 +106,7 @@ fun AddIncomeSheet(bottomSheetState: SheetState) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.End,
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Button(
                         enabled = isFormValid() && !isLoading,
