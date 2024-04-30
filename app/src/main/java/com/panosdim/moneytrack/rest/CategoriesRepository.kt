@@ -1,5 +1,7 @@
 package com.panosdim.moneytrack.rest
 
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.panosdim.moneytrack.App
 import com.panosdim.moneytrack.R
 import com.panosdim.moneytrack.db
@@ -47,6 +49,7 @@ object CategoriesRepository {
                         }.body()
                     )
                 }.onFailure {
+                    Firebase.crashlytics.recordException(it)
                     val errorMessage = when (it) {
                         is SocketTimeoutException -> App.instance.getString(R.string.connection_timeout)
                         is UnknownHostException -> App.instance.getString(R.string.unknown_host)

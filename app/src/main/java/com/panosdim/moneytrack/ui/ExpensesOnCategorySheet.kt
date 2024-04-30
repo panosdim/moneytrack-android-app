@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -18,9 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import com.panosdim.moneytrack.R
 import com.panosdim.moneytrack.models.Expense
 import com.panosdim.moneytrack.paddingLarge
 import com.panosdim.moneytrack.ui.theme.ExpenseColor
@@ -39,6 +40,7 @@ fun ExpensesOnCategorySheet(
     val edgeToEdgeEnabled by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val dateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    val listState = rememberLazyListState()
 
     // Sheet content
     if (bottomSheetState.isVisible) {
@@ -62,38 +64,34 @@ fun ExpensesOnCategorySheet(
                     modifier = Modifier
                         .fillMaxWidth(),
                 )
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = R.string.five_biggest_expenses),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.titleLarge,
-                )
 
-                expenses.forEach {
-                    ListItem(
-                        headlineContent = {
-                            Text(
-                                it.date.formatDate(
-                                    dateFormatter,
-                                    addTodayAndYesterdayInfo = false
-                                ),
-                                style = MaterialTheme.typography.headlineSmall,
-                            )
-                        },
-                        supportingContent = {
-                            if (it.comment.isNotBlank()) {
-                                Text(it.comment)
-                            }
-                        },
-                        trailingContent = {
-                            Text(
-                                text = moneyFormat(it.amount),
-                                style = MaterialTheme.typography.headlineSmall,
-                                color = ExpenseColor
-                            )
-                        },
-                    )
-                    HorizontalDivider()
+                LazyColumn(state = listState) {
+                    items(expenses) {
+                        ListItem(
+                            headlineContent = {
+                                Text(
+                                    it.date.formatDate(
+                                        dateFormatter,
+                                        addTodayAndYesterdayInfo = false
+                                    ),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                )
+                            },
+                            supportingContent = {
+                                if (it.comment.isNotBlank()) {
+                                    Text(it.comment)
+                                }
+                            },
+                            trailingContent = {
+                                Text(
+                                    text = moneyFormat(it.amount),
+                                    style = MaterialTheme.typography.headlineSmall,
+                                    color = ExpenseColor
+                                )
+                            },
+                        )
+                        HorizontalDivider()
+                    }
                 }
             }
         }

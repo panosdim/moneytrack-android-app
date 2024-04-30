@@ -526,7 +526,6 @@ fun DashboardScreen() {
                                     (date.isAfter(startOfMonth) || date.isEqual(startOfMonth)) &&
                                             (date.isBefore(endOfMonth) || date.isEqual(endOfMonth))
                                 }.filter { it.category == selectedCategory.id }
-                                    .take(5)
                                     .sortedByDescending { it.amount }
 
                                 scope.launch { expensesOnCategorySheetState.show() }
