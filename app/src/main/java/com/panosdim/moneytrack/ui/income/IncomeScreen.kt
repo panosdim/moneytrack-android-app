@@ -124,12 +124,8 @@ fun IncomeScreen() {
         mutableStateOf(false)
     }
 
-    var isTokenExpired by remember {
-        mutableStateOf(isJWTExpired())
-    }
-
     val isLoading by remember {
-        derivedStateOf { isLoadingIncome || isTokenExpired }
+        derivedStateOf { isLoadingIncome || isJWTExpired() }
     }
 
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -139,7 +135,7 @@ fun IncomeScreen() {
 
     DisposableEffectWithLifecycle(
         onResume = {
-            if (isTokenExpired) {
+            if (isJWTExpired()) {
                 scope.launch {
                     kotlin.runCatching {
                         client.post("login") {
@@ -148,14 +144,13 @@ fun IncomeScreen() {
                         }.body<LoginResponse>()
                     }.onSuccess {
                         prefs.token = it.token
-                        isTokenExpired = isJWTExpired()
                     }
                 }
             }
         }
     )
 
-    if (!isTokenExpired) {
+    if (!isJWTExpired()) {
         val incomeResponse =
             incomeViewModel.income.collectAsStateWithLifecycle(initialValue = Response.Loading)
 

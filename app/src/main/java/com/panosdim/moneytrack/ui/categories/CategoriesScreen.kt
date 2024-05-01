@@ -91,12 +91,8 @@ fun CategoriesScreen() {
         mutableStateOf(false)
     }
 
-    var isTokenExpired by remember {
-        mutableStateOf(isJWTExpired())
-    }
-
     val isLoading by remember {
-        derivedStateOf { isLoadingCategories || isTokenExpired }
+        derivedStateOf { isLoadingCategories || isJWTExpired() }
     }
 
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -106,7 +102,7 @@ fun CategoriesScreen() {
 
     DisposableEffectWithLifecycle(
         onResume = {
-            if (isTokenExpired) {
+            if (isJWTExpired()) {
                 scope.launch {
                     kotlin.runCatching {
                         client.post("login") {
@@ -115,14 +111,13 @@ fun CategoriesScreen() {
                         }.body<LoginResponse>()
                     }.onSuccess {
                         prefs.token = it.token
-                        isTokenExpired = isJWTExpired()
                     }
                 }
             }
         }
     )
 
-    if (!isTokenExpired) {
+    if (!isJWTExpired()) {
         val categoriesResponse =
             categoriesViewModel.categories.collectAsStateWithLifecycle(initialValue = Response.Loading)
 
