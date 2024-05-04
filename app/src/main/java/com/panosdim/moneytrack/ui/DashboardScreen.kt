@@ -130,8 +130,12 @@ fun DashboardScreen() {
         mutableStateOf(false)
     }
 
+    var isJWTExpired by remember {
+        mutableStateOf(false)
+    }
+
     val isLoading by remember {
-        derivedStateOf { isLoadingExpenses || isLoadingCategories || isLoadingIncome || isJWTExpired() }
+        derivedStateOf { isLoadingExpenses || isLoadingCategories || isLoadingIncome || isJWTExpired }
     }
 
     var income by remember { mutableStateOf(emptyList<Income>()) }
@@ -141,6 +145,7 @@ fun DashboardScreen() {
     DisposableEffectWithLifecycle(
         onResume = {
             if (isJWTExpired()) {
+                isJWTExpired = true
                 scope.launch {
                     runCatching {
                         client.post("login") {
@@ -149,6 +154,7 @@ fun DashboardScreen() {
                         }.body<LoginResponse>()
                     }.onSuccess {
                         prefs.token = it.token
+                        isJWTExpired = false
                     }
                 }
             }
@@ -189,7 +195,7 @@ fun DashboardScreen() {
         totalSavings = totalIncome - totalExpenses
     }
 
-    if (!isJWTExpired()) {
+    if (!isJWTExpired) {
         val expensesResponse =
             expensesViewModel.expenses.collectAsStateWithLifecycle(initialValue = Response.Loading)
 

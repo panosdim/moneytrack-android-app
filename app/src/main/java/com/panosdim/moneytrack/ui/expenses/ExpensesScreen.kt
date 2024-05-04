@@ -131,8 +131,12 @@ fun ExpensesScreen() {
         mutableStateOf(false)
     }
 
+    var isJWTExpired by remember {
+        mutableStateOf(false)
+    }
+
     val isLoading by remember {
-        derivedStateOf { isLoadingExpenses || isLoadingCategories || isJWTExpired() }
+        derivedStateOf { isLoadingExpenses || isLoadingCategories || isJWTExpired }
     }
 
     var searchText by rememberSaveable { mutableStateOf("") }
@@ -144,6 +148,7 @@ fun ExpensesScreen() {
     DisposableEffectWithLifecycle(
         onResume = {
             if (isJWTExpired()) {
+                isJWTExpired = true
                 scope.launch {
                     kotlin.runCatching {
                         client.post("login") {
@@ -152,13 +157,14 @@ fun ExpensesScreen() {
                         }.body<LoginResponse>()
                     }.onSuccess {
                         prefs.token = it.token
+                        isJWTExpired = false
                     }
                 }
             }
         }
     )
 
-    if (!isJWTExpired()) {
+    if (!isJWTExpired) {
         val expensesResponse =
             expensesViewModel.expenses.collectAsStateWithLifecycle(initialValue = Response.Loading)
 
