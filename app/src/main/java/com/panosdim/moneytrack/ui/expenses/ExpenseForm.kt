@@ -64,7 +64,7 @@ fun ExpenseForm(
     val isVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
     LaunchedEffect(key1 = isVisible) {
         if (isVisible) {
-            categoriesRowHeight.value = 100.dp
+            categoriesRowHeight.value = 0.dp
         } else {
             categoriesRowHeight.value = 200.dp
         }
