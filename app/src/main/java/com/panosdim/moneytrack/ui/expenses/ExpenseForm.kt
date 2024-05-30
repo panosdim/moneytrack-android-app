@@ -1,14 +1,12 @@
 package com.panosdim.moneytrack.ui.expenses
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -19,23 +17,26 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.panosdim.moneytrack.R
 import com.panosdim.moneytrack.models.Category
 import com.panosdim.moneytrack.models.FieldState
@@ -43,6 +44,7 @@ import com.panosdim.moneytrack.paddingLarge
 import com.panosdim.moneytrack.ui.OutlinedDatePicker
 import com.panosdim.moneytrack.utils.currencyRegex
 import com.panosdim.moneytrack.utils.toEpochMilli
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -56,19 +58,13 @@ fun ExpenseForm(
     validateAmount: () -> Unit,
     validateCategory: () -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
+    val skipPartiallyExpanded by remember { mutableStateOf(true) }
+    val categoriesSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = skipPartiallyExpanded
+    )
     val focusRequester = remember { FocusRequester() }
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val categoriesRowHeight = remember {
-        mutableStateOf(200.dp)
-    }
-    val isVisible = WindowInsets.ime.getBottom(LocalDensity.current) > 0
-    LaunchedEffect(key1 = isVisible) {
-        if (isVisible) {
-            categoriesRowHeight.value = 0.dp
-        } else {
-            categoriesRowHeight.value = 200.dp
-        }
-    }
+    val focusManager = LocalFocusManager.current
 
     LaunchedEffect(Unit) {
         if (expenseCategory.value == null) {
@@ -144,7 +140,12 @@ fun ExpenseForm(
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = false) {},
+            .onFocusChanged {
+                if (it.isFocused) {
+                    scope.launch { categoriesSheetState.show() }
+                    focusManager.clearFocus()
+                }
+            },
         readOnly = true,
         value = expenseCategory.value?.category ?: "",
         onValueChange = { validateCategory() },
@@ -160,22 +161,40 @@ fun ExpenseForm(
             }
         }
     )
-    FlowRow(
-        Modifier
-            .fillMaxWidth()
-            .height(categoriesRowHeight.value)
-            .verticalScroll(rememberScrollState())
-            .padding(bottom = paddingLarge),
-        horizontalArrangement = Arrangement.spacedBy(paddingLarge),
-    ) {
-        categories.sortedByDescending { it.count }.forEach {
-            AssistChip(
-                onClick = {
-                    expenseCategory.value = it
-                    keyboardController?.hide()
-                },
-                label = { Text(it.category) },
-            )
+    if (categoriesSheetState.isVisible) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                scope.launch {
+                    categoriesSheetState.hide()
+                    focusManager.clearFocus()
+                }
+            },
+            sheetState = categoriesSheetState,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = paddingLarge, end = paddingLarge)
+                    .navigationBarsPadding()
+            ) {
+                FlowRow(
+                    Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(bottom = paddingLarge),
+                    horizontalArrangement = Arrangement.spacedBy(paddingLarge),
+                ) {
+                    categories.sortedByDescending { it.count }.forEach {
+                        AssistChip(
+                            onClick = {
+                                expenseCategory.value = it
+                                scope.launch { categoriesSheetState.hide() }
+                            },
+                            label = { Text(it.category) },
+                        )
+                    }
+                }
+            }
         }
     }
 
