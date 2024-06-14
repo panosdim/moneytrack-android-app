@@ -10,6 +10,8 @@ class ExpensesFilterViewModel : ViewModel() {
     val filterDate: MutableStateFlow<Pair<Long, Long>?> = _filterDate
     private val _filterCategory = MutableStateFlow<List<Category>?>(null)
     var filterCategory: Flow<List<Category>?> = _filterCategory
+    private val _filterComment = MutableStateFlow<String?>(null)
+    var filterComment: Flow<String?> = _filterComment
 
     fun setDateFilter(dateFilter: Pair<Long?, Long?>?) {
         if (dateFilter != null) {
@@ -29,8 +31,13 @@ class ExpensesFilterViewModel : ViewModel() {
         _filterCategory.value = categoryFilter
     }
 
+    fun setCommentFilter(commentFilter: String?) {
+        _filterComment.value = commentFilter
+    }
+
     fun clearFilters() {
         setDateFilter(null)
         setCategoryFilter(null)
+        setCommentFilter(null)
     }
 }

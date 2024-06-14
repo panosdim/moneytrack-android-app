@@ -9,6 +9,7 @@ fun filter(
     expenseList: List<Expense>,
     filterDate: Pair<Long, Long>?,
     filterCategory: List<Category>?,
+    filterComment: String?,
 ): List<Expense> {
     val data = expenseList.toMutableList()
 
@@ -33,12 +34,25 @@ fun filter(
         }
     }
 
+    // Comment Filter
+    filterComment?.let { comment: String ->
+        if (comment.isNotEmpty()) {
+            data.retainAll { expense ->
+                expense.comment.unaccent().contains(
+                    comment.unaccent().trim(),
+                    ignoreCase = true
+                )
+            }
+        }
+    }
+
     return data
 }
 
 fun filter(
     incomeList: List<Income>,
     filterDate: Pair<Long, Long>?,
+    filterComment: String?,
 ): List<Income> {
     val data = incomeList.toMutableList()
 
@@ -51,6 +65,18 @@ fun filter(
                     && (date.isBefore(second.toLocalDate()) || date.isEqual(
                 second.toLocalDate()
             ))
+        }
+    }
+
+    // Comment Filter
+    filterComment?.let { comment: String ->
+        if (comment.isNotEmpty()) {
+            data.retainAll { income ->
+                income.comment.unaccent().contains(
+                    comment.unaccent().trim(),
+                    ignoreCase = true
+                )
+            }
         }
     }
 

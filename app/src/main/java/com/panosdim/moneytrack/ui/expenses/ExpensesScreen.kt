@@ -4,12 +4,10 @@ import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,12 +15,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -30,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -38,7 +33,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -64,7 +58,6 @@ import com.panosdim.moneytrack.utils.filter
 import com.panosdim.moneytrack.utils.isJWTExpired
 import com.panosdim.moneytrack.utils.moneyFormat
 import com.panosdim.moneytrack.utils.sort
-import com.panosdim.moneytrack.utils.unaccent
 import com.panosdim.moneytrack.viewmodels.CategoriesViewModel
 import com.panosdim.moneytrack.viewmodels.ExpensesFilterViewModel
 import com.panosdim.moneytrack.viewmodels.ExpensesSortViewModel
@@ -117,9 +110,11 @@ fun ExpensesScreen() {
         expensesFilterViewModel.filterDate.collectAsStateWithLifecycle(initialValue = null)
     val categoryFilter =
         expensesFilterViewModel.filterCategory.collectAsStateWithLifecycle(initialValue = null)
+    val commentFilter =
+        expensesFilterViewModel.filterComment.collectAsStateWithLifecycle(initialValue = null)
     val isFilterSet by remember {
         derivedStateOf {
-            dateFilter.value != null || categoryFilter.value != null
+            dateFilter.value != null || categoryFilter.value != null || commentFilter.value != null
         }
     }
 
@@ -138,8 +133,6 @@ fun ExpensesScreen() {
     val isLoading by remember {
         derivedStateOf { isLoadingExpenses || isLoadingCategories || isJWTExpired }
     }
-
-    var searchText by rememberSaveable { mutableStateOf("") }
 
     var expenses by remember { mutableStateOf(emptyList<Expense>()) }
     var categories by remember { mutableStateOf(emptyList<Category>()) }
@@ -267,35 +260,11 @@ fun ExpensesScreen() {
                 Column {
                     HeaderBar(
                         onSort = { scope.launch { expensesSortSheetState.show() } },
-                        listToSearch = expenses,
-                        searchQuery = searchText,
-                        onSearchChanged = { searchText = it },
-                        isFilterSet = isFilterSet
+                        isFilterSet = isFilterSet,
+                        showBackToTop = !expandedFab,
+                        listState = listState,
                     ) {
                         scope.launch { expensesFilterSheetState.show() }
-                    }
-
-                    // Back to top button
-                    if (!expandedFab) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = paddingLarge, end = paddingLarge),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            TextButton(onClick = { scope.launch { listState.animateScrollToItem(0) } }) {
-                                Icon(
-                                    Icons.Default.ArrowUpward,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(ButtonDefaults.IconSize)
-                                )
-                                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                                Text(
-                                    stringResource(id = R.string.back_to_top)
-                                )
-                            }
-                        }
                     }
 
                     Box(Modifier.pullRefresh(state)) {
@@ -307,7 +276,7 @@ fun ExpensesScreen() {
                             contentPadding = contentPadding,
                             state = listState
                         ) {
-                            if (expenseSortField.value == ExpenseSortField.DATE && searchText.isBlank() && !isFilterSet) {
+                            if (expenseSortField.value == ExpenseSortField.DATE && !isFilterSet) {
                                 val data = sort(
                                     expenses,
                                     categories,
@@ -353,17 +322,12 @@ fun ExpensesScreen() {
                                 )
 
                                 // Filter
-                                data = filter(data, dateFilter.value, categoryFilter.value)
-
-                                // Search
-                                if (searchText.isNotBlank()) {
-                                    data = data.filter {
-                                        it.comment.unaccent().contains(
-                                            searchText.unaccent().trim(),
-                                            ignoreCase = true
-                                        )
-                                    }
-                                }
+                                data = filter(
+                                    data,
+                                    dateFilter.value,
+                                    categoryFilter.value,
+                                    commentFilter.value
+                                )
 
                                 if (data.isNotEmpty()) {
                                     items(data) { expenseItem ->
