@@ -86,4 +86,6 @@
     <string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
     <string name="total_savings">Total Savings</string>
+    <string name="sort_options">Sort Options</string>
+    <string name="filter_options">Filter Options</string>
 </resources>

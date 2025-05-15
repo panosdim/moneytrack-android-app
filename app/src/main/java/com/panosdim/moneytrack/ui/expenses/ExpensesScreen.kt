@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
@@ -22,6 +21,7 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -114,7 +114,7 @@ fun ExpensesScreen() {
         expensesFilterViewModel.filterComment.collectAsStateWithLifecycle(initialValue = null)
     val isFilterSet by remember {
         derivedStateOf {
-            dateFilter.value != null || categoryFilter.value != null || commentFilter.value != null
+            dateFilter.value != null || categoryFilter.value != null
         }
     }
 
@@ -263,9 +263,9 @@ fun ExpensesScreen() {
                         isFilterSet = isFilterSet,
                         showBackToTop = !expandedFab,
                         listState = listState,
-                    ) {
-                        scope.launch { expensesFilterSheetState.show() }
-                    }
+                        onFilter = { scope.launch { expensesFilterSheetState.show() } },
+                        onSearch = { expensesFilterViewModel.setCommentFilter(it) }
+                    )
 
                     Box(Modifier.pullRefresh(state)) {
                         // Show expenses
@@ -276,7 +276,7 @@ fun ExpensesScreen() {
                             contentPadding = contentPadding,
                             state = listState
                         ) {
-                            if (expenseSortField.value == ExpenseSortField.DATE && !isFilterSet) {
+                            if (expenseSortField.value == ExpenseSortField.DATE && !isFilterSet && (commentFilter.value == null || commentFilter.value!!.isEmpty())) {
                                 val data = sort(
                                     expenses,
                                     categories,
@@ -330,10 +330,14 @@ fun ExpensesScreen() {
                                 )
 
                                 if (data.isNotEmpty()) {
-                                    items(data) { expenseItem ->
+                                    items(data.size) { index ->
+                                        val expenseItem = data[index]
                                         ExpenseListItem(expenseItem, categories) {
                                             expense = it
                                             scope.launch { editExpenseSheetState.show() }
+                                        }
+                                        if (index < data.size - 1) {
+                                            HorizontalDivider()
                                         }
                                     }
 

@@ -9,6 +9,7 @@ import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.pm.PackageInfoCompat
+import androidx.core.net.toUri
 import com.panosdim.moneytrack.R
 import com.panosdim.moneytrack.TAG
 import com.panosdim.moneytrack.models.FileMetadata
@@ -22,14 +23,13 @@ var refId: Long = -1
 
 private val json = Json { ignoreUnknownKeys = true }
 
-fun checkForNewVersion(context: Context) {
+fun checkForNewVersion(context: Context, updateUrl: String) {
     val metadataFileName = "output-metadata.json"
     val apkFileName = "app-release.apk"
-    val backendUrl = "https://apps.dsw.mywire.org/money-track/"
     val url: URL
 
     try {
-        url = URL(backendUrl + metadataFileName)
+        url = URL(updateUrl + metadataFileName)
         val conn = url.openConnection() as HttpURLConnection
         conn.instanceFollowRedirects = true
         conn.requestMethod = "GET"
@@ -63,7 +63,7 @@ fun checkForNewVersion(context: Context) {
                 val versionName = fileMetadata.elements[0].versionName
 
                 // Download APK file
-                val apkUri = Uri.parse(backendUrl + apkFileName)
+                val apkUri = (updateUrl + apkFileName).toUri()
                 downloadNewVersion(context, apkUri, versionName)
             }
         }

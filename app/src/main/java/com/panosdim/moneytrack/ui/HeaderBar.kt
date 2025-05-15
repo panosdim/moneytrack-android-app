@@ -1,5 +1,6 @@
 package com.panosdim.moneytrack.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,14 +11,24 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,6 +37,7 @@ import com.panosdim.moneytrack.R
 import com.panosdim.moneytrack.paddingLarge
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HeaderBar(
     onSort: () -> Unit,
@@ -33,29 +45,82 @@ fun HeaderBar(
     showBackToTop: Boolean,
     listState: LazyListState,
     onFilter: () -> Unit,
+    onSearch: (String?) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    
-    Row(
+    var searchText by rememberSaveable { mutableStateOf("") }
+
+    SearchBar(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = paddingLarge, end = paddingLarge),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        TextButton(onClick = { onSort() }) {
-            Icon(
-                Icons.AutoMirrored.Filled.Sort,
-                contentDescription = null,
-                modifier = Modifier.size(ButtonDefaults.IconSize)
+            .padding(paddingLarge),
+        inputField = {
+            SearchBarDefaults.InputField(
+                expanded = false,
+                onExpandedChange = {},
+                placeholder = { Text(stringResource(id = R.string.comment_search)) },
+                leadingIcon = {
+                    if (searchText.isNotEmpty()) {
+                        Icon(
+                            Icons.Default.Clear,
+                            contentDescription = null,
+                            modifier = Modifier.clickable {
+                                searchText = ""
+                                onSearch(null)
+                            })
+                    } else {
+                        Icon(
+                            Icons.Default.Search,
+                            contentDescription = null
+                        )
+                    }
+                },
+                trailingIcon = {
+                    Row {
+                        IconButton(onClick = { onSort() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Sort,
+                                contentDescription = null
+                            )
+                        }
+                        IconButton(
+                            onClick = { onFilter() },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = if (isFilterSet) {
+                                    Color.Green
+                                } else {
+                                    IconButtonDefaults.iconButtonColors().contentColor
+                                }
+                            )
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.FilterList,
+                                contentDescription = null
+                            )
+                        }
+                    }
+                },
+                query = searchText,
+                onQueryChange = {
+                    searchText = it
+                    onSearch(searchText)
+                },
+                onSearch = {}
             )
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text(
-                stringResource(id = R.string.sort)
-            )
-        }
+        },
+        expanded = false,
+        onExpandedChange = {}
+    ) {}
 
-        if (showBackToTop) {
+    if (showBackToTop) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = paddingLarge, end = paddingLarge),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+
             TextButton(onClick = { scope.launch { listState.animateScrollToItem(0) } }) {
                 Icon(
                     Icons.Default.ArrowUpward,
@@ -67,27 +132,6 @@ fun HeaderBar(
                     stringResource(id = R.string.back_to_top)
                 )
             }
-        }
-
-        TextButton(
-            onClick = { onFilter() },
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = if (isFilterSet) {
-                    Color.Green
-                } else {
-                    MaterialTheme.colorScheme.primary
-                }
-            )
-        ) {
-            Icon(
-                Icons.Default.FilterList,
-                contentDescription = null,
-                modifier = Modifier.size(ButtonDefaults.IconSize)
-            )
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text(
-                stringResource(id = R.string.filter)
-            )
         }
     }
 }

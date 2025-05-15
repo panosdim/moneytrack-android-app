@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
@@ -28,6 +27,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -309,13 +309,14 @@ fun DashboardScreen() {
                 ) {
                     ElevatedFilterChip(
                         modifier = Modifier
-                            .menuAnchor(),
+                            .menuAnchor(MenuAnchorType.PrimaryEditable),
                         selected = false,
                         onClick = { },
                         leadingIcon = { Icon(Icons.Default.CalendarMonth, null) },
                         label = {
-                            Text(selectedMonth.name.lowercase()
-                                .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() })
+                            Text(
+                                selectedMonth.name.lowercase()
+                                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() })
                         },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedMonth) },
                     )
@@ -351,7 +352,7 @@ fun DashboardScreen() {
                 ) {
                     ElevatedFilterChip(
                         modifier = Modifier
-                            .menuAnchor(),
+                            .menuAnchor(MenuAnchorType.PrimaryEditable),
                         selected = false,
                         onClick = { },
                         label = { Text(selectedYear.toString()) },
@@ -498,7 +499,8 @@ fun DashboardScreen() {
                     .padding(paddingLarge),
                 state = listState
             ) {
-                items(monthExpensesPerCategories) { item ->
+                items(monthExpensesPerCategories.size) { index ->
+                    val item = monthExpensesPerCategories[index]
                     ListItem(
                         headlineContent = {
                             Text(
@@ -533,7 +535,9 @@ fun DashboardScreen() {
                             }
                         }
                     )
-                    HorizontalDivider()
+                    if (index < monthExpensesPerCategories.size - 1) {
+                        HorizontalDivider()
+                    }
                 }
             }
         }

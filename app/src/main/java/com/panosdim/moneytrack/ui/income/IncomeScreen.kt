@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
@@ -22,6 +21,7 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -112,7 +112,7 @@ fun IncomeScreen() {
 
     val isFilterSet by remember {
         derivedStateOf {
-            dateFilter.value != null || commentFilter.value != null
+            dateFilter.value != null
         }
     }
 
@@ -229,9 +229,9 @@ fun IncomeScreen() {
                         isFilterSet = isFilterSet,
                         showBackToTop = !expandedFab,
                         listState = listState,
-                    ) {
-                        scope.launch { incomeFilterSheetState.show() }
-                    }
+                        onFilter = { scope.launch { incomeFilterSheetState.show() } },
+                        onSearch = { incomeFilterViewModel.setCommentFilter(it) }
+                    )
 
                     Box(Modifier.pullRefresh(state)) {
                         // Show income
@@ -242,7 +242,7 @@ fun IncomeScreen() {
                             contentPadding = contentPadding,
                             state = listState
                         ) {
-                            if (incomeSortField.value == IncomeSortField.DATE && !isFilterSet) {
+                            if (incomeSortField.value == IncomeSortField.DATE && !isFilterSet && (commentFilter.value == null || commentFilter.value!!.isEmpty())) {
                                 val data = sort(
                                     incomeList,
                                     incomeSortField.value,
@@ -294,10 +294,14 @@ fun IncomeScreen() {
                                 data = filter(data, dateFilter.value, commentFilter.value)
 
                                 if (data.isNotEmpty()) {
-                                    items(data) { incomeItem ->
+                                    items(data.size) { index ->
+                                        val incomeItem = data[index]
                                         IncomeListItem(incomeItem) {
                                             income = it
                                             scope.launch { editIncomeSheetState.show() }
+                                        }
+                                        if (index < data.size - 1) {
+                                            HorizontalDivider()
                                         }
                                     }
 

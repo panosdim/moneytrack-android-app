@@ -38,6 +38,5 @@ class ExpensesFilterViewModel : ViewModel() {
     fun clearFilters() {
         setDateFilter(null)
         setCategoryFilter(null)
-        setCommentFilter(null)
     }
 }

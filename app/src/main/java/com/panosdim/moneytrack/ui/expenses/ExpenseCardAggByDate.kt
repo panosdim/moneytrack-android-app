@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -59,7 +60,7 @@ fun ExpenseCardAggByDate(
                         .fillMaxWidth(),
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                expensesList.forEach { expenseDetails ->
+                expensesList.forEachIndexed { index, expenseDetails ->
                     val categoryName = getCategoryName(
                         expenseDetails.category,
                         categories
@@ -91,9 +92,12 @@ fun ExpenseCardAggByDate(
                         },
                         modifier = Modifier.clickable {
                             selectedExpense(expenseDetails)
-                        }
+                        },
+                        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest)
                     )
-                    HorizontalDivider()
+                    if (index < expensesList.size - 1) {
+                        HorizontalDivider()
+                    }
                 }
 
                 Text(

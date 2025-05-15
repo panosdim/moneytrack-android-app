@@ -16,8 +16,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.google.firebase.FirebaseApp
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.panosdim.moneytrack.TAG
-import com.panosdim.moneytrack.auth
 import com.panosdim.moneytrack.ui.MainScreen
 import com.panosdim.moneytrack.ui.theme.MoneyTrackTheme
 import com.panosdim.moneytrack.utils.checkForNewVersion
@@ -29,6 +30,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private lateinit var manager: DownloadManager
     private lateinit var onComplete: BroadcastReceiver
+    private lateinit var remoteConfig: FirebaseRemoteConfig
     private val scope = CoroutineScope(Dispatchers.IO)
 
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
@@ -36,7 +38,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         // Handle new version installation after the download of APK file.
-        manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        manager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         onComplete = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 val referenceId = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
@@ -62,26 +64,26 @@ class MainActivity : ComponentActivity() {
 
         FirebaseApp.initializeApp(this)
 
-        if (auth.currentUser == null) {
-            auth.signInAnonymously()
-                .addOnCompleteListener(this@MainActivity) { task ->
-                    if (task.isSuccessful) {
-                        // Sign in success
-                        Log.d(TAG, "signInAnonymously:success")
-                    } else {
-                        // If sign in fails, display a message to the user.
-                        Log.w(TAG, "signInAnonymously:failure", task.exception)
-                    }
-                }
-                .addOnFailureListener {
-                    Log.w(TAG, "Fail to login anonymously.", it)
-                }
-        }
+        remoteConfig = FirebaseRemoteConfig.getInstance()
+        val configSettings = FirebaseRemoteConfigSettings.Builder()
+            .setMinimumFetchIntervalInSeconds(2592000) // Fetch at least every 30 days
+            .build()
+        remoteConfig.setConfigSettingsAsync(configSettings)
 
-        // Check for new version
-        scope.launch {
-            checkForNewVersion(this@MainActivity)
-        }
+        remoteConfig.fetchAndActivate()
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    val updateUrl = remoteConfig.getString("UPDATE_URL")
+                    Log.d(TAG, "Update URL: $updateUrl")
+                    // Check for new version
+                    scope.launch {
+                        checkForNewVersion(this@MainActivity, updateUrl)
+                    }
+                } else {
+                    // Handle fetch failure (e.g., log the error)
+                    Log.e(TAG, "Error fetching remote config", task.exception)
+                }
+            }
 
         setContent {
             MoneyTrackTheme {

@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
@@ -17,7 +16,7 @@ fun DisposableEffectWithLifecycle(
     onResume: () -> Unit = {},
     onPause: () -> Unit = {},
     onDestroy: () -> Unit = {},
-    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+    lifecycleOwner: LifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
 ) {
     val currentOnCreate by rememberUpdatedState(onCreate)
     val currentOnStart by rememberUpdatedState(onStart)

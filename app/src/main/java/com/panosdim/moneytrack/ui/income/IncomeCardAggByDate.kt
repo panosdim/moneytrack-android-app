@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,7 +53,7 @@ fun IncomeCardAggByDate(
                         .fillMaxWidth(),
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                incomesList.forEach { incomeDetails ->
+                incomesList.forEachIndexed { index, incomeDetails ->
                     ListItem(
                         headlineContent = {
                             if (incomeDetails.comment.isNotBlank()) {
@@ -68,9 +69,12 @@ fun IncomeCardAggByDate(
                         },
                         modifier = Modifier.clickable {
                             selectedIncome(incomeDetails)
-                        }
+                        },
+                        colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest)
                     )
-                    HorizontalDivider()
+                    if (index < incomesList.size - 1) {
+                        HorizontalDivider()
+                    }
                 }
 
                 Text(

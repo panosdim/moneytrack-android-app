@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -27,6 +26,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -50,7 +50,6 @@ import com.panosdim.moneytrack.models.LoginRequest
 import com.panosdim.moneytrack.models.LoginResponse
 import com.panosdim.moneytrack.models.Response
 import com.panosdim.moneytrack.paddingLarge
-import com.panosdim.moneytrack.paddingSmall
 import com.panosdim.moneytrack.prefs
 import com.panosdim.moneytrack.rest.client
 import com.panosdim.moneytrack.utils.DisposableEffectWithLifecycle
@@ -100,7 +99,6 @@ fun CategoriesScreen() {
     }
 
     var searchText by rememberSaveable { mutableStateOf("") }
-    var active by rememberSaveable { mutableStateOf(false) }
 
     var categories by remember { mutableStateOf(emptyList<Category>()) }
 
@@ -185,44 +183,39 @@ fun CategoriesScreen() {
                 Column {
                     SearchBar(
                         modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
+                            .fillMaxWidth()
                             .padding(paddingLarge),
-                        query = searchText,
-                        onQueryChange = { searchText = it },
-                        onSearch = { active = false },
-                        active = active,
-                        onActiveChange = {
-                            active = it
-                        },
-                        placeholder = { Text(stringResource(id = R.string.category_search)) },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                        trailingIcon = {
-                            if (searchText.isNotEmpty()) {
-                                Icon(
-                                    Icons.Default.Clear,
-                                    contentDescription = null,
-                                    modifier = Modifier.clickable {
-                                        searchText = ""
-                                        active = false
-                                    })
-                            }
-                        }
-                    ) {
-                        categories.filter {
-                            removeEmojis(it.category).contains(searchText, ignoreCase = true)
-                        }.forEach {
-                            ListItem(
-                                headlineContent = { Text(it.category) },
-                                modifier = Modifier
-                                    .clickable {
-                                        searchText = removeEmojis(it.category)
-                                        active = false
+                        inputField = {
+                            SearchBarDefaults.InputField(
+                                expanded = false,
+                                onExpandedChange = {},
+                                placeholder = { Text(stringResource(id = R.string.category_search)) },
+                                leadingIcon = {
+                                    Icon(
+                                        Icons.Default.Search,
+                                        contentDescription = null
+                                    )
+                                },
+                                trailingIcon = {
+                                    if (searchText.isNotEmpty()) {
+                                        Icon(
+                                            Icons.Default.Clear,
+                                            contentDescription = null,
+                                            modifier = Modifier.clickable {
+                                                searchText = ""
+                                            })
                                     }
-                                    .fillMaxWidth()
-                                    .padding(horizontal = paddingLarge, vertical = paddingSmall)
+                                },
+                                query = searchText,
+                                onQueryChange = {
+                                    searchText = it
+                                },
+                                onSearch = {}
                             )
-                        }
-                    }
+                        },
+                        expanded = false,
+                        onExpandedChange = {}
+                    ) {}
 
                     // Show Categories
                     LazyColumn(
@@ -245,7 +238,8 @@ fun CategoriesScreen() {
                             }
 
                         if (data.isNotEmpty()) {
-                            items(data) { categoryItem ->
+                            items(data.size) { index ->
+                                val categoryItem = data[index]
                                 ListItem(
                                     headlineContent = {
                                         Text(
@@ -264,7 +258,9 @@ fun CategoriesScreen() {
                                         scope.launch { editCategorySheetState.show() }
                                     }
                                 )
-                                HorizontalDivider()
+                                if (index < data.size - 1) {
+                                    HorizontalDivider()
+                                }
                             }
                         } else {
                             item {

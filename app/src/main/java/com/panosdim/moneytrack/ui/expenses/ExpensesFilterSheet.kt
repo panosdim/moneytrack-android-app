@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
@@ -26,9 +25,9 @@ import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDateRangePickerState
@@ -36,14 +35,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -70,8 +67,6 @@ fun ExpensesFilterSheet(
         expensesFilterViewModel.filterDate.collectAsStateWithLifecycle(initialValue = null)
     val categoryFilter =
         expensesFilterViewModel.filterCategory.collectAsStateWithLifecycle(initialValue = null)
-    val commentFilter =
-        expensesFilterViewModel.filterComment.collectAsStateWithLifecycle(initialValue = null)
 
     // Sheet content
     if (bottomSheetState.isVisible) {
@@ -84,17 +79,15 @@ fun ExpensesFilterSheet(
                 initialSelectedEndDateMillis = dateFilter.value?.second
             )
 
-        val searchComment = remember { mutableStateOf(commentFilter.value ?: "") }
-
         val isFilterSet by remember {
             derivedStateOf {
-                selectedCategories.isNotEmpty() || dateRangePickerState.selectedEndDateMillis != null || searchComment.value.isNotEmpty()
+                selectedCategories.isNotEmpty() || dateRangePickerState.selectedEndDateMillis != null
             }
         }
 
         val isFilterActive by remember {
             derivedStateOf {
-                dateFilter.value != null || categoryFilter.value != null || commentFilter.value != null
+                dateFilter.value != null || categoryFilter.value != null
             }
         }
 
@@ -108,6 +101,14 @@ fun ExpensesFilterSheet(
                     .padding(start = paddingLarge, end = paddingLarge)
                     .navigationBarsPadding()
             ) {
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.headlineSmall,
+                    text = stringResource(
+                        R.string.filter_options
+                    )
+                )
                 OutlinedDateRangePicker(
                     state = dateRangePickerState,
                     label = stringResource(id = R.string.date),
@@ -210,20 +211,6 @@ fun ExpensesFilterSheet(
                     }
                 }
 
-                OutlinedTextField(
-                    value = searchComment.value,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Text,
-                        imeAction = ImeAction.Done
-                    ),
-                    singleLine = true,
-                    onValueChange = { searchComment.value = it },
-                    label = { Text(stringResource(id = R.string.comment_search)) },
-                    modifier = Modifier
-                        .padding(bottom = paddingLarge)
-                        .fillMaxWidth()
-                )
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -258,7 +245,6 @@ fun ExpensesFilterSheet(
                                 )
                             )
                             expensesFilterViewModel.setCategoryFilter(selectedCategories)
-                            expensesFilterViewModel.setCommentFilter(searchComment.value)
                             scope.launch { bottomSheetState.hide() }
                         },
                     ) {

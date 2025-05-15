@@ -30,6 +30,5 @@ class IncomeFilterViewModel : ViewModel() {
 
     fun clearFilters() {
         setDateFilter(null)
-        setCommentFilter(null)
     }
 }
