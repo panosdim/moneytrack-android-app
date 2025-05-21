@@ -255,7 +255,6 @@ fun ExpensesScreen() {
                         text = { Text(text = stringResource(id = R.string.add_expense)) },
                     )
                 }
-
             ) { contentPadding ->
                 Column {
                     HeaderBar(

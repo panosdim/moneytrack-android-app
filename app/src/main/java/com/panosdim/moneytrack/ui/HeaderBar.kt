@@ -1,37 +1,30 @@
 package com.panosdim.moneytrack.ui
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.FilterAlt
+import androidx.compose.material.icons.filled.FilterAltOff
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.panosdim.moneytrack.R
 import com.panosdim.moneytrack.paddingLarge
@@ -53,7 +46,7 @@ fun HeaderBar(
     SearchBar(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(paddingLarge),
+            .padding(horizontal = paddingLarge),
         inputField = {
             SearchBarDefaults.InputField(
                 expanded = false,
@@ -77,6 +70,14 @@ fun HeaderBar(
                 },
                 trailingIcon = {
                     Row {
+                        if (showBackToTop) {
+                            IconButton(onClick = { scope.launch { listState.animateScrollToItem(0) } }) {
+                                Icon(
+                                    Icons.Default.ArrowUpward,
+                                    contentDescription = null
+                                )
+                            }
+                        }
                         IconButton(onClick = { onSort() }) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Sort,
@@ -85,16 +86,13 @@ fun HeaderBar(
                         }
                         IconButton(
                             onClick = { onFilter() },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = if (isFilterSet) {
-                                    Color.Green
-                                } else {
-                                    IconButtonDefaults.iconButtonColors().contentColor
-                                }
-                            )
                         ) {
                             Icon(
-                                imageVector = Icons.Default.FilterList,
+                                imageVector = if (isFilterSet) {
+                                    Icons.Default.FilterAlt
+                                } else {
+                                    Icons.Default.FilterAltOff
+                                },
                                 contentDescription = null
                             )
                         }
@@ -111,27 +109,4 @@ fun HeaderBar(
         expanded = false,
         onExpandedChange = {}
     ) {}
-
-    if (showBackToTop) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = paddingLarge, end = paddingLarge),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-
-            TextButton(onClick = { scope.launch { listState.animateScrollToItem(0) } }) {
-                Icon(
-                    Icons.Default.ArrowUpward,
-                    contentDescription = null,
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
-                )
-                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text(
-                    stringResource(id = R.string.back_to_top)
-                )
-            }
-        }
-    }
 }
