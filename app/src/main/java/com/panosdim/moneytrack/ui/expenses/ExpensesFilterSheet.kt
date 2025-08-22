@@ -200,13 +200,13 @@ fun ExpensesFilterSheet(
                     categories.sortedByDescending { it.count }.forEach {
                         if (!selectedCategories.contains(it)) {
                             ElevatedFilterChip(
-                                selected = false,
-                                onClick = {
-                                    selectedCategories.add(it)
-                                },
-                                label = { Text(it.category) },
-                                leadingIcon = null
-                            )
+                                    selected = false,
+                                    onClick = {
+                                        selectedCategories.add(it)
+                                    },
+                                    label = { Text(it.category) },
+                                    leadingIcon = null
+                                )
                         }
                     }
                 }

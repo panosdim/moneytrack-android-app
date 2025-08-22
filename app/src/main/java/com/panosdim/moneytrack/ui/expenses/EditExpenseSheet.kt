@@ -238,14 +238,15 @@ fun EditExpenseSheet(
                             datePickerState.selectedDateMillis?.toLocalDate()
                                 ?.let { localDate ->
                                     expenseCategory.value?.id?.let { categoryId ->
-                                        // Update expense object
-                                        expense.date = localDate.toString()
-                                        expense.amount = expenseAmount.value.toFloat()
-                                        expense.category = categoryId
-                                        expense.comment = expenseComment.value
+                                        val updatedExpense = expense.copy(
+                                            date = localDate.toString(),
+                                            amount = expenseAmount.value.toFloat(),
+                                            category = categoryId,
+                                            comment = expenseComment.value
+                                        )
 
                                         scope.launch {
-                                            viewModel.updateExpense(expense).collect {
+                                            viewModel.updateExpense(updatedExpense).collect {
                                                 when (it) {
                                                     is Response.Success -> {
                                                         isLoading = false
