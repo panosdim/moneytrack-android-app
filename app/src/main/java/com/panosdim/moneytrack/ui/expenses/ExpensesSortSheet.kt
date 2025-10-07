@@ -12,11 +12,11 @@ import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -87,7 +87,7 @@ fun ExpensesSortSheet(
                     ) {
                         ElevatedFilterChip(
                             modifier = Modifier
-                                .menuAnchor(MenuAnchorType.PrimaryEditable),
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
                             selected = false,
                             onClick = { },
                             leadingIcon = { Icon(Icons.AutoMirrored.Filled.Sort, "Sort Field") },
@@ -116,7 +116,7 @@ fun ExpensesSortSheet(
                     ) {
                         ElevatedFilterChip(
                             modifier = Modifier
-                                .menuAnchor(MenuAnchorType.PrimaryEditable),
+                                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable),
                             selected = false,
                             onClick = { },
                             label = { Text(selectedDirectionText.value.title) },

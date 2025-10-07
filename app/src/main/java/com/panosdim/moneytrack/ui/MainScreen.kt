@@ -10,14 +10,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.panosdim.moneytrack.ui.categories.CategoriesScreen
 import com.panosdim.moneytrack.ui.expenses.ExpensesScreen
@@ -62,7 +60,6 @@ fun NavigationGraph(navController: NavHostController, paddingValues: PaddingValu
 
 @Composable
 fun BottomNavigation(navController: NavController) {
-    var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf(
         BottomNavItem.Expenses,
         BottomNavItem.Income,
@@ -71,13 +68,15 @@ fun BottomNavigation(navController: NavController) {
     )
 
     NavigationBar {
-        items.forEachIndexed { index, item ->
+        val navBackStackEntry by navController.currentBackStackEntryAsState()
+        val currentRoute = navBackStackEntry?.destination?.route
+
+        items.forEach { item ->
             NavigationBarItem(
                 icon = { Icon(item.icon, item.title) },
                 label = { Text(item.title) },
-                selected = selectedItem == index,
+                selected = currentRoute == item.screenRoute,
                 onClick = {
-                    selectedItem = index
                     navController.navigate(item.screenRoute) {
 
                         navController.graph.startDestinationRoute?.let { screenRoute ->
