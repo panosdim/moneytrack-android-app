@@ -87,15 +87,13 @@ fun ExpenseForm(
     ) {
         AssistChip(
             onClick = {
-                val today = LocalDate.now()
-                datePickerState.selectedDateMillis = today.toEpochMilli()
+                datePickerState.selectedDateMillis = LocalDate.now().toEpochMilli()
             },
             label = { Text(stringResource(id = R.string.today)) },
         )
         AssistChip(
             onClick = {
-                val yesterday = LocalDate.now().minusDays(1)
-                datePickerState.selectedDateMillis = yesterday.toEpochMilli()
+                datePickerState.selectedDateMillis = LocalDate.now().minusDays(1).toEpochMilli()
             },
             label = { Text(stringResource(id = R.string.yesterday)) },
         )

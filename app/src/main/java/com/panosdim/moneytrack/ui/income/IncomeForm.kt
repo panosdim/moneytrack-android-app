@@ -1,10 +1,13 @@
 package com.panosdim.moneytrack.ui.income
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EuroSymbol
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.DatePickerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -26,6 +29,8 @@ import com.panosdim.moneytrack.models.FieldState
 import com.panosdim.moneytrack.paddingLarge
 import com.panosdim.moneytrack.ui.OutlinedDatePicker
 import com.panosdim.moneytrack.utils.currencyRegex
+import com.panosdim.moneytrack.utils.toEpochMilli
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,6 +57,25 @@ fun IncomeForm(
             .padding(bottom = paddingLarge),
         dateFormatter = DateTimeFormatter.ofPattern("MMM yyyy")
     )
+    Row(
+        modifier = Modifier
+            .padding(bottom = paddingLarge)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        AssistChip(
+            onClick = {
+                datePickerState.selectedDateMillis = LocalDate.now().minusMonths(1).toEpochMilli()
+            },
+            label = { Text(stringResource(id = R.string.previous_month)) },
+        )
+        AssistChip(
+            onClick = {
+                datePickerState.selectedDateMillis = LocalDate.now().plusMonths(1).toEpochMilli()
+            },
+            label = { Text(stringResource(id = R.string.next_month)) },
+        )
+    }
 
     OutlinedTextField(
         value = incomeAmount.value,

@@ -88,4 +88,5 @@
     <string name="total_savings">Total Savings</string>
     <string name="sort_options">Sort Options</string>
     <string name="filter_options">Filter Options</string>
+    <string name="next_month">Next Month</string>
 </resources>

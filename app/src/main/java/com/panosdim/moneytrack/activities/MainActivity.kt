@@ -8,13 +8,16 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.core.net.toUri
 import com.google.firebase.FirebaseApp
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
@@ -33,6 +36,12 @@ class MainActivity : ComponentActivity() {
     private lateinit var remoteConfig: FirebaseRemoteConfig
     private val scope = CoroutineScope(Dispatchers.IO)
 
+    private val requestInstallPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            // After returning from settings, we don't need to do anything specific.
+            // If the user granted permission, the next time they try to install, it will work.
+        }
+
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +57,14 @@ class MainActivity : ComponentActivity() {
                     installIntent.setDataAndType(apkUri, "application/vnd.android.package-archive")
                     installIntent.flags =
                         Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
-                    startActivity(installIntent)
+
+                    if (!packageManager.canRequestPackageInstalls()) {
+                        val intentSettings = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES)
+                        intentSettings.data = "package:$packageName".toUri()
+                        requestInstallPermissionLauncher.launch(intentSettings)
+                    } else {
+                        startActivity(installIntent)
+                    }
                 }
             }
         }

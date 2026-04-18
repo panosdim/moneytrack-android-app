@@ -111,7 +111,7 @@ fun ExpensesScreen() {
     val categoryFilter =
         expensesFilterViewModel.filterCategory.collectAsStateWithLifecycle(initialValue = null)
     val commentFilter =
-        expensesFilterViewModel.filterComment.collectAsStateWithLifecycle(initialValue = null)
+        expensesFilterViewModel.filterComment.collectAsStateWithLifecycle(initialValue = "")
     val isFilterSet by remember {
         derivedStateOf {
             dateFilter.value != null || categoryFilter.value != null
@@ -258,12 +258,13 @@ fun ExpensesScreen() {
             ) { contentPadding ->
                 Column {
                     HeaderBar(
+                        query = commentFilter.value,
+                        onQueryChange = { expensesFilterViewModel.setCommentFilter(it) },
                         onSort = { scope.launch { expensesSortSheetState.show() } },
                         isFilterSet = isFilterSet,
                         showBackToTop = !expandedFab,
                         listState = listState,
                         onFilter = { scope.launch { expensesFilterSheetState.show() } },
-                        onSearch = { expensesFilterViewModel.setCommentFilter(it) }
                     )
 
                     Box(Modifier.pullRefresh(state)) {
@@ -275,7 +276,7 @@ fun ExpensesScreen() {
                             contentPadding = contentPadding,
                             state = listState
                         ) {
-                            if (expenseSortField.value == ExpenseSortField.DATE && !isFilterSet && (commentFilter.value == null || commentFilter.value!!.isEmpty())) {
+                            if (expenseSortField.value == ExpenseSortField.DATE && !isFilterSet && commentFilter.value.isEmpty()) {
                                 val data = sort(
                                     expenses,
                                     categories,

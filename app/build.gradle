@@ -4,21 +4,21 @@ plugins {
     id 'com.google.gms.google-services'
     id 'com.google.firebase.crashlytics'
     id 'kotlin-parcelize'
-    id 'org.jetbrains.kotlin.plugin.serialization' version '2.2.20'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '2.3.20'
     id 'com.google.devtools.ksp'
-    id 'org.jetbrains.kotlin.plugin.compose' version "2.2.20"
+    id 'org.jetbrains.kotlin.plugin.compose' version "2.3.20"
 }
 
 android {
     namespace 'com.panosdim.moneytrack'
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId "com.panosdim.moneytrack"
         minSdk 30
-        targetSdk 36
-        versionCode 52
-        versionName '8.9'
+        targetSdk 37
+        versionCode 53
+        versionName '9.0'
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -52,25 +52,26 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.17.0'
+    implementation 'androidx.core:core-ktx:1.18.0'
     implementation platform('org.jetbrains.kotlin:kotlin-bom:2.0.0')
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.9.4'
-    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4'
-    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.9.4'
-    implementation 'androidx.activity:activity-compose:1.11.0'
-    implementation 'androidx.navigation:navigation-compose:2.9.5'
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.10.0'
+    implementation 'androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime-compose:2.10.0'
+    implementation 'androidx.activity:activity-compose:1.13.0'
+    implementation 'androidx.navigation:navigation-compose:2.9.7'
+    implementation 'androidx.fragment:fragment-ktx:1.8.9'
 
     // Testing
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.3.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.7.0'
-    androidTestImplementation platform('androidx.compose:compose-bom:2025.09.01')
+    androidTestImplementation platform('androidx.compose:compose-bom:2026.03.01')
     androidTestImplementation 'androidx.compose.ui:ui-test-junit4'
     debugImplementation 'androidx.compose.ui:ui-tooling'
     debugImplementation 'androidx.compose.ui:ui-test-manifest'
 
     //Compose
-    implementation platform('androidx.compose:compose-bom:2025.09.01')
+    implementation platform('androidx.compose:compose-bom:2026.03.01')
     implementation 'androidx.compose.ui:ui'
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
@@ -79,7 +80,7 @@ dependencies {
     implementation 'androidx.compose.material:material-icons-extended'
 
     //Firebase
-    implementation platform('com.google.firebase:firebase-bom:34.3.0')
+    implementation platform('com.google.firebase:firebase-bom:34.12.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-crashlytics'
     implementation 'com.google.firebase:firebase-config'
@@ -89,7 +90,7 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2'
 
     // Serialization
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0'
 
     // Ktor
     def ktor_version = '3.1.3'
@@ -101,11 +102,11 @@ dependencies {
     implementation "io.ktor:ktor-client-auth:$ktor_version"
 
     // Room
-    def room_version = '2.8.1'
+    def room_version = '2.8.4'
     implementation "androidx.room:room-runtime:$room_version"
     ksp "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-ktx:$room_version"
 
     // JWT
-    implementation 'com.auth0:java-jwt:4.5.0'
+    implementation 'com.auth0:java-jwt:4.5.1'
 }

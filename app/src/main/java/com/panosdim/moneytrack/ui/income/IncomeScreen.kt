@@ -108,7 +108,7 @@ fun IncomeScreen() {
         incomeFilterViewModel.filterDate.collectAsStateWithLifecycle(initialValue = null)
 
     val commentFilter =
-        incomeFilterViewModel.filterComment.collectAsStateWithLifecycle(initialValue = null)
+        incomeFilterViewModel.filterComment.collectAsStateWithLifecycle(initialValue = "")
 
     val isFilterSet by remember {
         derivedStateOf {
@@ -225,12 +225,13 @@ fun IncomeScreen() {
             ) { contentPadding ->
                 Column {
                     HeaderBar(
+                        query = commentFilter.value,
+                        onQueryChange = { incomeFilterViewModel.setCommentFilter(it) },
                         onSort = { scope.launch { incomeSortSheetState.show() } },
                         isFilterSet = isFilterSet,
                         showBackToTop = !expandedFab,
                         listState = listState,
                         onFilter = { scope.launch { incomeFilterSheetState.show() } },
-                        onSearch = { incomeFilterViewModel.setCommentFilter(it) }
                     )
 
                     Box(Modifier.pullRefresh(state)) {
@@ -242,7 +243,7 @@ fun IncomeScreen() {
                             contentPadding = contentPadding,
                             state = listState
                         ) {
-                            if (incomeSortField.value == IncomeSortField.DATE && !isFilterSet && (commentFilter.value == null || commentFilter.value!!.isEmpty())) {
+                            if (incomeSortField.value == IncomeSortField.DATE && !isFilterSet && commentFilter.value.isEmpty()) {
                                 val data = sort(
                                     incomeList,
                                     incomeSortField.value,

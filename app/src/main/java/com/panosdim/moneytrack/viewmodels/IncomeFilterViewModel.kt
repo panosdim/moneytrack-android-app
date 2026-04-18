@@ -7,8 +7,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class IncomeFilterViewModel : ViewModel() {
     private val _filterDate = MutableStateFlow<Pair<Long, Long>?>(null)
     val filterDate: MutableStateFlow<Pair<Long, Long>?> = _filterDate
-    private val _filterComment = MutableStateFlow<String?>(null)
-    var filterComment: Flow<String?> = _filterComment
+    private val _filterComment = MutableStateFlow("")
+    var filterComment: MutableStateFlow<String> = _filterComment
 
     fun setDateFilter(dateFilter: Pair<Long?, Long?>?) {
         if (dateFilter != null) {
@@ -24,7 +24,7 @@ class IncomeFilterViewModel : ViewModel() {
         }
     }
 
-    fun setCommentFilter(commentFilter: String?) {
+    fun setCommentFilter(commentFilter: String) {
         _filterComment.value = commentFilter
     }
 

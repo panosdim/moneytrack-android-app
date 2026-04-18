@@ -19,11 +19,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.panosdim.moneytrack.R
@@ -33,15 +29,15 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HeaderBar(
+    query: String,
+    onQueryChange: (String) -> Unit,
     onSort: () -> Unit,
     isFilterSet: Boolean,
     showBackToTop: Boolean,
     listState: LazyListState,
     onFilter: () -> Unit,
-    onSearch: (String?) -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    var searchText by rememberSaveable { mutableStateOf("") }
 
     SearchBar(
         modifier = Modifier
@@ -53,13 +49,12 @@ fun HeaderBar(
                 onExpandedChange = {},
                 placeholder = { Text(stringResource(id = R.string.comment_search)) },
                 leadingIcon = {
-                    if (searchText.isNotEmpty()) {
+                    if (query.isNotEmpty()) {
                         Icon(
                             Icons.Default.Clear,
                             contentDescription = null,
                             modifier = Modifier.clickable {
-                                searchText = ""
-                                onSearch(null)
+                                onQueryChange("")
                             })
                     } else {
                         Icon(
@@ -98,11 +93,8 @@ fun HeaderBar(
                         }
                     }
                 },
-                query = searchText,
-                onQueryChange = {
-                    searchText = it
-                    onSearch(searchText)
-                },
+                query = query,
+                onQueryChange = onQueryChange,
                 onSearch = {}
             )
         },
