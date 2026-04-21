@@ -13,13 +13,13 @@ class IncomeSortViewModel : ViewModel() {
     var sortDirection: Flow<SortDirection> = _sortDirection
 
     fun setSortField(sortField: String) {
-        IncomeSortField.values().find { it.title == sortField }?.let {
+        IncomeSortField.entries.find { it.title == sortField }?.let {
             _sortField.value = it
         }
     }
 
     fun setSortDirection(sortDirection: String) {
-        SortDirection.values().find { it.title == sortDirection }?.let {
+        SortDirection.entries.find { it.title == sortDirection }?.let {
             _sortDirection.value = it
         }
     }

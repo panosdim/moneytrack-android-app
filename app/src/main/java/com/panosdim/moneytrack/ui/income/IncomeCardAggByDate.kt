@@ -15,7 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import com.panosdim.moneytrack.R
 import com.panosdim.moneytrack.models.Income
@@ -30,9 +30,6 @@ fun IncomeCardAggByDate(
     incomesList: List<Income>,
     selectedIncome: (income: Income) -> Unit
 ) {
-    val context = LocalContext.current
-    val resources = context.resources
-
     Card(
         modifier = Modifier
             .padding(paddingSmall)
@@ -78,7 +75,7 @@ fun IncomeCardAggByDate(
                 }
 
                 Text(
-                    text = resources.getString(
+                    text = stringResource(
                         R.string.total,
                         moneyFormat(incomesList.fold(0f) { acc, incomeDetails -> acc + incomeDetails.amount })
                     ),

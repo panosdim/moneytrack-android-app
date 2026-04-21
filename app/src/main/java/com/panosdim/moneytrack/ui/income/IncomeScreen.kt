@@ -72,7 +72,6 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun IncomeScreen() {
     val context = LocalContext.current
-    val resources = context.resources
     val scope = rememberCoroutineScope()
     val incomeSortViewModel: IncomeSortViewModel = viewModel()
     val incomeFilterViewModel: IncomeFilterViewModel = viewModel()
@@ -256,9 +255,9 @@ fun IncomeScreen() {
                                 }
 
                                 if (data.isNotEmpty()) {
-                                    data.iterator().forEachRemaining {
+                                    data.iterator().forEachRemaining { entry ->
                                         item {
-                                            IncomeCardAggByDate(it.key, it.value) {
+                                            IncomeCardAggByDate(entry.key, entry.value) {
                                                 income = it
                                                 scope.launch { editIncomeSheetState.show() }
                                             }
@@ -314,7 +313,7 @@ fun IncomeScreen() {
                                                 .padding(top = paddingLarge),
                                             textAlign = TextAlign.Center,
                                             style = MaterialTheme.typography.headlineMedium,
-                                            text = resources.getString(
+                                            text = stringResource(
                                                 R.string.total,
                                                 moneyFormat(data.fold(0f) { acc, incomeDetails -> acc + incomeDetails.amount })
                                             )

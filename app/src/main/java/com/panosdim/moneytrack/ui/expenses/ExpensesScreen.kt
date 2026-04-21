@@ -73,7 +73,6 @@ import kotlinx.coroutines.launch
 @Composable
 fun ExpensesScreen() {
     val context = LocalContext.current
-    val resources = context.resources
     val scope = rememberCoroutineScope()
     val expensesSortViewModel: ExpensesSortViewModel = viewModel()
     val expensesFilterViewModel: ExpensesFilterViewModel = viewModel()
@@ -285,9 +284,13 @@ fun ExpensesScreen() {
                                 ).groupBy { it.date }
 
                                 if (data.isNotEmpty()) {
-                                    data.iterator().forEachRemaining {
+                                    data.iterator().forEachRemaining { entry ->
                                         item {
-                                            ExpenseCardAggByDate(it.key, it.value, categories) {
+                                            ExpenseCardAggByDate(
+                                                entry.key,
+                                                entry.value,
+                                                categories
+                                            ) {
                                                 expense = it
                                                 scope.launch { editExpenseSheetState.show() }
                                             }
@@ -349,7 +352,7 @@ fun ExpensesScreen() {
                                                 .padding(top = paddingLarge),
                                             textAlign = TextAlign.Center,
                                             style = MaterialTheme.typography.headlineMedium,
-                                            text = resources.getString(
+                                            text = stringResource(
                                                 R.string.total,
                                                 moneyFormat(data.fold(0f) { acc, expenseDetails -> acc + expenseDetails.amount })
                                             )

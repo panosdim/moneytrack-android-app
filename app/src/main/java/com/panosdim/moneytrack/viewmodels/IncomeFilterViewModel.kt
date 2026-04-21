@@ -1,7 +1,6 @@
 package com.panosdim.moneytrack.viewmodels
 
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class IncomeFilterViewModel : ViewModel() {
